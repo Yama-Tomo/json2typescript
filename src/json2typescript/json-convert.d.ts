@@ -124,7 +124,7 @@ export declare class JsonConvert {
      *
      * @returns {any} the JSON object
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -137,7 +137,7 @@ export declare class JsonConvert {
      *
      * @returns {any} the JSON object
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -150,7 +150,7 @@ export declare class JsonConvert {
      *
      * @returns {any[]} the JSON array
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -164,7 +164,7 @@ export declare class JsonConvert {
      *
      * @returns {any} the deserialized data (TypeScript instance or array of TypeScript instances)
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -180,7 +180,7 @@ export declare class JsonConvert {
      *
      * @returns {any} the deserialized TypeScript instance
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -196,7 +196,7 @@ export declare class JsonConvert {
      *
      * @returns {any[]} the deserialized array of TypeScript instances
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -211,7 +211,7 @@ export declare class JsonConvert {
      * @param classPropertyName the property name
      * @param json the JSON object
      *
-     * @throws throws an expection in case of failure
+     * @throws throws an Error in case of failure
      */
     private serializeObject_loopProperty;
     /**
@@ -221,7 +221,7 @@ export declare class JsonConvert {
      * @param classPropertyName the property name
      * @param json the JSON object
      *
-     * @throws throws an expection in case of failure
+     * @throws throws an Error in case of failure
      */
     private deserializeObject_loopProperty;
     /**
@@ -243,9 +243,21 @@ export declare class JsonConvert {
      *
      * @returns returns the resulted mapped property
      *
-     * @throws throws an expection in case of failure
+     * @throws an error in case of failure
      */
     private verifyProperty;
+    /**
+     * Gets the value of an object for a given value.
+     * If the object does not have the specific key, an Error is thrown.
+     *
+     * @param data
+     * @param key
+     *
+     * @returns returns the value
+     *
+     * @throws an Error in case of the key was not found in the object
+     */
+    private getObjectValue;
     /**
      * Returns a string representation of the expected json type.
      *

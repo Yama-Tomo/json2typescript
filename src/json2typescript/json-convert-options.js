@@ -19,7 +19,7 @@ exports.Settings = Settings;
 var MappingOptions = /** @class */ (function () {
     function MappingOptions() {
         this.classPropertyName = "";
-        this.jsonPropertyName = "";
+        this.jsonPropertyName = [];
         this.expectedJsonType = undefined;
         this.isOptional = false;
         this.customConverter = null;

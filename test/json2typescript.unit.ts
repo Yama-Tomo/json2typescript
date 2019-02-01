@@ -81,6 +81,7 @@ describe('Unit tests', () => {
         dog1.owner = null;
         dog1.other = 1.1;
 
+
         // SETUP CHECKS
         describe('setup checks', () => {
             it('JsonConvert instance', () => {
@@ -246,8 +247,9 @@ describe('Unit tests', () => {
 
             it('getExpectedType()', () => {
                 expect((<any>jsonConvert).getExpectedType(JsonConvert)).toBe("JsonConvert");
-                expect((<any>jsonConvert).getExpectedType([String, [Boolean, Number]])).toBe("[string,[boolean,number]]");
-                expect((<any>jsonConvert).getExpectedType([[null, Any], Object])).toBe("[[any,any],any]");
+                expect((<any>jsonConvert).getExpectedType([String, [Boolean, Number]])).toBe("array");
+                expect((<any>jsonConvert).getExpectedType([String, [Boolean, Number]], true)).toBe("[string,[boolean,number]]");
+                expect((<any>jsonConvert).getExpectedType([[null, Any], Object], true)).toBe("[[any,any],any]");
                 expect((<any>jsonConvert).getExpectedType(undefined)).toBe("undefined");
                 expect((<any>jsonConvert).getExpectedType("?")).toBe("?????");
             });

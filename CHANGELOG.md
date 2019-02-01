@@ -1,3 +1,9 @@
+# v1.0.8 (2019-02-01)
+
+## Features
+
+* Refactor using type checking of Array.isArray and constructor.name instead of instanceof
+
 # v1.0.7 (2019-01-22)
 
 ## Bug Fixes

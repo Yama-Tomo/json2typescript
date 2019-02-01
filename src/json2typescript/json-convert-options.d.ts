@@ -11,7 +11,7 @@ export declare class Settings {
  */
 export declare class MappingOptions {
     classPropertyName: string;
-    jsonPropertyName: string;
+    jsonPropertyName: string[];
     expectedJsonType?: string;
     isOptional: boolean;
     customConverter: any;

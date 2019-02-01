@@ -142,7 +142,7 @@ function JsonProperty() {
         }
         var jsonPropertyMappingOptions = new json_convert_options_1.MappingOptions();
         jsonPropertyMappingOptions.classPropertyName = classPropertyName;
-        jsonPropertyMappingOptions.jsonPropertyName = jsonPropertyName;
+        jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
         jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
         // Check if conversionOption is a type or a custom converter.
         if (typeof (conversionOption) !== "undefined" && conversionOption !== null && typeof (conversionOption[json_convert_options_1.Settings.MAPPER_PROPERTY]) !== "undefined") {
@@ -152,7 +152,14 @@ function JsonProperty() {
             jsonPropertyMappingOptions.expectedJsonType = conversionOption;
         }
         // Save the mapping info
-        target[json_convert_options_1.Settings.MAPPING_PROPERTY][json_convert_options_1.Settings.CLASS_IDENTIFIER + "." + classPropertyName] = jsonPropertyMappingOptions;
+        if (typeof (target[json_convert_options_1.Settings.MAPPING_PROPERTY][json_convert_options_1.Settings.CLASS_IDENTIFIER + "." + classPropertyName]) === "undefined") {
+            // First decorator for this classProperty
+            target[json_convert_options_1.Settings.MAPPING_PROPERTY][json_convert_options_1.Settings.CLASS_IDENTIFIER + "." + classPropertyName] = jsonPropertyMappingOptions;
+        }
+        else {
+            // Second decorator - just add the alternative JSON-name for this classProperty
+            target[json_convert_options_1.Settings.MAPPING_PROPERTY][json_convert_options_1.Settings.CLASS_IDENTIFIER + "." + classPropertyName].jsonPropertyName.unshift(jsonPropertyName);
+        }
     };
 }
 exports.JsonProperty = JsonProperty;
