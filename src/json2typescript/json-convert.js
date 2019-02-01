@@ -186,7 +186,7 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any} the JSON object
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -226,13 +226,13 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any} the JSON object
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
      */
     JsonConvert.prototype.serializeObject = function (instance) {
-        if (typeof (instance) !== "object" || instance instanceof Array) {
+        if (typeof (instance) !== "object" || Array.isArray(instance)) {
             throw new Error("Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.serializeObject() is not of type object.");
         }
@@ -264,13 +264,13 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any[]} the JSON array
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
      */
     JsonConvert.prototype.serializeArray = function (instanceArray) {
-        if (typeof (instanceArray) !== "object" || instanceArray instanceof Array === false) {
+        if (typeof (instanceArray) !== "object" || !Array.isArray(instanceArray)) {
             throw new Error("Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.serializeArray() is not of type array.");
         }
@@ -303,7 +303,7 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any} the deserialized data (TypeScript instance or array of TypeScript instances)
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
@@ -340,13 +340,13 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any} the deserialized TypeScript instance
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
      */
     JsonConvert.prototype.deserializeObject = function (jsonObject, classReference) {
-        if (typeof (jsonObject) !== "object" || jsonObject instanceof Array) {
+        if (typeof (jsonObject) !== "object" || Array.isArray(jsonObject)) {
             throw new Error("Fatal error in JsonConvert. " +
                 "Passed parameter jsonObject in JsonConvert.deserializeObject() is not of type object.");
         }
@@ -379,13 +379,13 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {any[]} the deserialized array of TypeScript instances
      *
-     * @throws an exception in case of failure
+     * @throws an Error in case of failure
      *
      * @author Andreas Aeschlimann, DHlab, University of Basel, Switzerland
      * @see https://www.npmjs.com/package/json2typescript full documentation
      */
     JsonConvert.prototype.deserializeArray = function (jsonArray, classReference) {
-        if (typeof (jsonArray) !== "object" || jsonArray instanceof Array === false) {
+        if (typeof (jsonArray) !== "object" || !Array.isArray(jsonArray)) {
             throw new Error("Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.deserializeArray() is not of type array.");
         }
@@ -420,7 +420,7 @@ var JsonConvert = /** @class */ (function () {
      * @param classPropertyName the property name
      * @param json the JSON object
      *
-     * @throws throws an expection in case of failure
+     * @throws throws an Error in case of failure
      */
     JsonConvert.prototype.serializeObject_loopProperty = function (instance, classPropertyName, json) {
         // Check if a JSON-object mapping is possible for a property
@@ -429,7 +429,7 @@ var JsonConvert = /** @class */ (function () {
             return;
         }
         // Get expected and real values
-        var jsonKey = mappingOptions.jsonPropertyName;
+        var jsonPropertyName = mappingOptions.jsonPropertyName;
         var expectedJsonType = mappingOptions.expectedJsonType;
         var isOptional = mappingOptions.isOptional;
         var customConverter = mappingOptions.customConverter;
@@ -441,20 +441,21 @@ var JsonConvert = /** @class */ (function () {
             throw new Error("Fatal error in JsonConvert. " +
                 "Failed to map the JavaScript instance of class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" to JSON because the defined class property \"" + classPropertyName + "\" does not exist or is not defined:\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
-                "\tJSON property: \n\t\t" + jsonKey + "\n\n");
+                "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n");
         }
         // Map the property
         try {
-            json[jsonKey] = customConverter !== null ? customConverter.serialize(classInstancePropertyValue) : this.verifyProperty(expectedJsonType, classInstancePropertyValue, true);
+            // Each class property might have multiple decorators - only use the JSON property name as defined in the first one
+            json[jsonPropertyName[0]] = customConverter !== null ? customConverter.serialize(classInstancePropertyValue) : this.verifyProperty(expectedJsonType, classInstancePropertyValue, true);
         }
         catch (e) {
             throw new Error("Fatal error in JsonConvert. " +
                 "Failed to map the JavaScript instance of class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" to JSON because of a type error.\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
                 "\tClass property value: \n\t\t" + classInstancePropertyValue + "\n\n" +
-                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType) + "\n\n" +
+                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType, true) + "\n\n" +
                 "\tRuntime type: \n\t\t" + this.getTrueType(classInstancePropertyValue) + "\n\n" +
-                "\tJSON property: \n\t\t" + jsonKey + "\n\n" +
+                "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n" +
                 e.message + "\n");
         }
     };
@@ -465,7 +466,7 @@ var JsonConvert = /** @class */ (function () {
      * @param classPropertyName the property name
      * @param json the JSON object
      *
-     * @throws throws an expection in case of failure
+     * @throws throws an Error in case of failure
      */
     JsonConvert.prototype.deserializeObject_loopProperty = function (instance, classPropertyName, json) {
         var mappingOptions = this.getClassPropertyMappingOptions(instance, classPropertyName);
@@ -473,28 +474,28 @@ var JsonConvert = /** @class */ (function () {
             return;
         }
         // Get expected and real values
-        var jsonKey = mappingOptions.jsonPropertyName;
+        var jsonPropertyName = mappingOptions.jsonPropertyName;
         var expectedJsonType = mappingOptions.expectedJsonType;
         var isOptional = mappingOptions.isOptional;
         var customConverter = mappingOptions.customConverter;
-        var jsonValue = json[jsonKey];
-        // Try to find other key in case insensitive mode
-        if (typeof (jsonValue) === "undefined" && this.propertyMatchingRule === json_convert_enums_1.PropertyMatchingRule.CASE_INSENSITIVE) {
-            // Make a key mapping for the json object so that jsonKeys[lowerCaseKey] = originalKey
-            var jsonKeys = Object.keys(json).reduce(function (keys, key) {
-                keys[key.toLowerCase()] = key;
-                return keys;
-            }, {});
-            jsonValue = json[jsonKeys[jsonKey.toLowerCase()]];
+        var jsonValue = undefined;
+        // Loop all properties and try to find the value for it
+        for (var _i = 0, jsonPropertyName_1 = jsonPropertyName; _i < jsonPropertyName_1.length; _i++) {
+            var n = jsonPropertyName_1[_i];
+            try {
+                jsonValue = this.getObjectValue(json, n);
+                break;
+            }
+            catch (_a) { }
         }
         // Check if the json value exists
         if (typeof (jsonValue) === "undefined") {
             if (isOptional)
                 return;
             throw new Error("Fatal error in JsonConvert. " +
-                "Failed to map the JSON object to the class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" because the defined JSON property \"" + jsonKey + "\" does not exist:\n\n" +
+                "Failed to map the JSON object to the class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" because the defined JSON property \"" + jsonPropertyName + "\" does not exist:\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
-                "\tJSON property: \n\t\t" + jsonKey + "\n\n");
+                "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n");
         }
         // Map the property
         try {
@@ -502,13 +503,13 @@ var JsonConvert = /** @class */ (function () {
         }
         catch (e) {
             throw new Error("Fatal error in JsonConvert. " +
-                "Failed to map the JSON object to the JavaScript class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" because of a type error.\n\n" +
+                "Failed to map the JSON object to the class \"" + instance[json_convert_options_1.Settings.CLASS_IDENTIFIER] + "\" because of a type error.\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
-                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType) + "\n\n" +
-                "\tJSON property: \n\t\t" + jsonKey + "\n\n" +
+                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType, true) + "\n\n" +
+                "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n" +
                 "\tJSON type: \n\t\t" + this.getJsonType(jsonValue) + "\n\n" +
                 "\tJSON value: \n\t\t" + JSON.stringify(jsonValue) + "\n\n" +
-                e.message + "\n\n");
+                e.message + "\n");
         }
     };
     ////////////////////
@@ -549,15 +550,16 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns returns the resulted mapped property
      *
-     * @throws throws an expection in case of failure
+     * @throws an error in case of failure
      */
     JsonConvert.prototype.verifyProperty = function (expectedJsonType, value, serialize) {
+        var type = this.getExpectedType(expectedJsonType).toLowerCase();
         // Map immediately if we don't care about the type
-        if (expectedJsonType === any_1.Any || expectedJsonType === null || expectedJsonType === Object) {
+        if (type === 'any') {
             return value;
         }
         // Check if attempt and expected was 1-d
-        if (expectedJsonType instanceof Array === false && value instanceof Array === false) {
+        if (type !== 'array' && !Array.isArray(value)) {
             // Check the type
             if (typeof (expectedJsonType) !== "undefined" && expectedJsonType.prototype.hasOwnProperty(json_convert_options_1.Settings.CLASS_IDENTIFIER)) { // only decorated custom objects have this injected property
                 // Check if we have null value
@@ -572,7 +574,7 @@ var JsonConvert = /** @class */ (function () {
                 else
                     return this.deserializeObject(value, expectedJsonType);
             }
-            else if (expectedJsonType === any_1.Any || expectedJsonType === null || expectedJsonType === Object) { // general object
+            else if (type === 'any') { // general object
                 // Check if we have null value
                 if (value === null) {
                     if (this.valueCheckingMode !== json_convert_enums_1.ValueCheckingMode.DISALLOW_NULL)
@@ -582,7 +584,7 @@ var JsonConvert = /** @class */ (function () {
                 }
                 return value;
             }
-            else if (expectedJsonType === String || expectedJsonType === Number || expectedJsonType === Boolean) { // otherwise check for a primitive type
+            else if (type === 'string' || type === 'number' || type === 'boolean') { // otherwise check for a primitive type
                 // Check if we have null value
                 if (value === null) {
                     if (this.valueCheckingMode === json_convert_enums_1.ValueCheckingMode.ALLOW_NULL)
@@ -592,9 +594,9 @@ var JsonConvert = /** @class */ (function () {
                 }
                 // Check if the types match
                 if ( // primitive types match
-                (expectedJsonType === String && typeof (value) === "string") ||
-                    (expectedJsonType === Number && typeof (value) === "number") ||
-                    (expectedJsonType === Boolean && typeof (value) === "boolean")) {
+                (type === 'string' && typeof (value) === "string") ||
+                    (type === 'number' && typeof (value) === "number") ||
+                    (type === 'boolean' && typeof (value) === "boolean")) {
                     return value;
                 }
                 else { // primitive types mismatch
@@ -611,7 +613,7 @@ var JsonConvert = /** @class */ (function () {
             }
         }
         // Check if attempt and expected was n-d
-        if (expectedJsonType instanceof Array && value instanceof Array) {
+        if (type === 'array' && Array.isArray(value)) {
             var array = [];
             // No data given, so return empty value
             if (value.length === 0) {
@@ -631,7 +633,7 @@ var JsonConvert = /** @class */ (function () {
             return array;
         }
         // Check if attempt was 1-d and expected was n-d
-        if (expectedJsonType instanceof Array && value instanceof Object) {
+        if (type === 'array' && value instanceof Object) {
             var array = [];
             // No data given, so return empty value
             if (value.length === 0) {
@@ -653,7 +655,7 @@ var JsonConvert = /** @class */ (function () {
             return array;
         }
         // Check if attempt was 1-d and expected was n-d
-        if (expectedJsonType instanceof Array) {
+        if (type === 'array') {
             if (value === null) {
                 if (this.valueCheckingMode !== json_convert_enums_1.ValueCheckingMode.DISALLOW_NULL)
                     return null;
@@ -663,11 +665,39 @@ var JsonConvert = /** @class */ (function () {
             throw new Error("\tReason: Expected type is array, but given value is non-array.");
         }
         // Check if attempt was n-d and expected as 1-d
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
             throw new Error("\tReason: Given value is array, but expected a non-array type.");
         }
         // All other attempts are fatal
         throw new Error("\tReason: Mapping failed because of an unknown error.");
+    };
+    /**
+     * Gets the value of an object for a given value.
+     * If the object does not have the specific key, an Error is thrown.
+     *
+     * @param data
+     * @param key
+     *
+     * @returns returns the value
+     *
+     * @throws an Error in case of the key was not found in the object
+     */
+    JsonConvert.prototype.getObjectValue = function (data, key) {
+        // If we do not care about the case of the key, ad
+        if (this.propertyMatchingRule === json_convert_enums_1.PropertyMatchingRule.CASE_INSENSITIVE) {
+            // Create a mapping of the keys: keys[lowercase]=normalcase
+            var keyMapping = Object.keys(data).reduce(function (keys, key) {
+                keys[key.toLowerCase()] = key;
+                return keys;
+            }, {});
+            // Define the new key
+            key = keyMapping[key.toLowerCase()];
+        }
+        // Throw an error if the key is not in the object
+        if (key in data === false) {
+            throw new Error();
+        }
+        return data[key];
     };
     ///////////////////////////
     // JSON2TYPESCRIPT TYPES //
@@ -679,14 +709,18 @@ var JsonConvert = /** @class */ (function () {
      *
      * @returns {string} the string representation
      */
-    JsonConvert.prototype.getExpectedType = function (expectedJsonType) {
-        var type = "";
-        if (expectedJsonType instanceof Array) {
+    JsonConvert.prototype.getExpectedType = function (expectedJsonType, showIncludeValuesWhenArray) {
+        if (showIncludeValuesWhenArray === void 0) { showIncludeValuesWhenArray = false; }
+        if (Array.isArray(expectedJsonType)) {
+            var type = 'array';
+            if (!showIncludeValuesWhenArray) {
+                return type;
+            }
             type = "[";
             for (var i = 0; i < expectedJsonType.length; i++) {
                 if (i > 0)
                     type += ",";
-                type += this.getExpectedType(expectedJsonType[i]);
+                type += this.getExpectedType(expectedJsonType[i], showIncludeValuesWhenArray);
             }
             type += "]";
             return type;
@@ -720,7 +754,7 @@ var JsonConvert = /** @class */ (function () {
         if (jsonValue === null)
             return "null";
         var type = "";
-        if (jsonValue instanceof Array) {
+        if (Array.isArray(jsonValue)) {
             type = "[";
             for (var i = 0; i < jsonValue.length; i++) {
                 if (i > 0)
