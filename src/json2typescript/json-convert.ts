@@ -241,7 +241,7 @@ export class JsonConvert {
      */
     serializeObject(instance: any): any {
 
-        if (typeof (instance) !== "object" || instance instanceof Array) {
+        if (typeof (instance) !== "object" || Array.isArray(instance)) {
             throw new Error(
                 "Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.serializeObject() is not of type object."
@@ -288,7 +288,7 @@ export class JsonConvert {
      */
     serializeArray(instanceArray: any[]): any[] {
 
-        if (typeof (instanceArray) !== "object" || instanceArray instanceof Array === false) {
+        if (typeof (instanceArray) !== "object" || !Array.isArray(instanceArray)) {
             throw new Error(
                 "Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.serializeArray() is not of type array."
@@ -384,7 +384,7 @@ export class JsonConvert {
      */
     deserializeObject(jsonObject: any, classReference: { new(): any }): any {
 
-        if (typeof (jsonObject) !== "object" || jsonObject instanceof Array) {
+        if (typeof (jsonObject) !== "object" || Array.isArray(jsonObject)) {
             throw new Error(
                 "Fatal error in JsonConvert. " +
                 "Passed parameter jsonObject in JsonConvert.deserializeObject() is not of type object."
@@ -432,7 +432,7 @@ export class JsonConvert {
      */
     deserializeArray(jsonArray: any[], classReference: { new(): any }): any[] {
 
-        if (typeof (jsonArray) !== "object" || jsonArray instanceof Array === false) {
+        if (typeof (jsonArray) !== "object" || !Array.isArray(jsonArray)) {
             throw new Error(
                 "Fatal error in JsonConvert. " +
                 "Passed parameter jsonArray in JsonConvert.deserializeArray() is not of type array."
@@ -522,7 +522,7 @@ export class JsonConvert {
                 "Failed to map the JavaScript instance of class \"" + instance[Settings.CLASS_IDENTIFIER] + "\" to JSON because of a type error.\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
                 "\tClass property value: \n\t\t" + classInstancePropertyValue + "\n\n" +
-                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType) + "\n\n" +
+                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType, true) + "\n\n" +
                 "\tRuntime type: \n\t\t" + this.getTrueType(classInstancePropertyValue) + "\n\n" +
                 "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n" +
                 e.message + "\n"
@@ -588,7 +588,7 @@ export class JsonConvert {
                 "Fatal error in JsonConvert. " +
                 "Failed to map the JSON object to the class \"" + instance[Settings.CLASS_IDENTIFIER] + "\" because of a type error.\n\n" +
                 "\tClass property: \n\t\t" + classPropertyName + "\n\n" +
-                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType) + "\n\n" +
+                "\tExpected type: \n\t\t" + this.getExpectedType(expectedJsonType, true) + "\n\n" +
                 "\tJSON property: \n\t\t" + jsonPropertyName + "\n\n" +
                 "\tJSON type: \n\t\t" + this.getJsonType(jsonValue) + "\n\n" +
                 "\tJSON value: \n\t\t" + JSON.stringify(jsonValue) + "\n\n" +
@@ -646,14 +646,15 @@ export class JsonConvert {
      * @throws an error in case of failure
      */
     private verifyProperty(expectedJsonType: any, value: any, serialize?: boolean): any {
+        const type = this.getExpectedType(expectedJsonType).toLowerCase();
 
         // Map immediately if we don't care about the type
-        if (expectedJsonType === Any || expectedJsonType === null || expectedJsonType === Object) {
+        if (type === 'any') {
             return value;
         }
 
         // Check if attempt and expected was 1-d
-        if (expectedJsonType instanceof Array === false && value instanceof Array === false) {
+        if (type !== 'array' && !Array.isArray(value)) {
 
             // Check the type
             if (typeof (expectedJsonType) !== "undefined" && expectedJsonType.prototype.hasOwnProperty(Settings.CLASS_IDENTIFIER)) { // only decorated custom objects have this injected property
@@ -668,7 +669,7 @@ export class JsonConvert {
                 if (serialize) return this.serializeObject(value);
                 else return this.deserializeObject(value, expectedJsonType);
 
-            } else if (expectedJsonType === Any || expectedJsonType === null || expectedJsonType === Object) { // general object
+            } else if (type === 'any') { // general object
 
                 // Check if we have null value
                 if (value === null) {
@@ -679,7 +680,7 @@ export class JsonConvert {
 
                 return value;
 
-            } else if (expectedJsonType === String || expectedJsonType === Number || expectedJsonType === Boolean) { // otherwise check for a primitive type
+            } else if (type === 'string' || type === 'number' || type === 'boolean') { // otherwise check for a primitive type
 
                 // Check if we have null value
                 if (value === null) {
@@ -689,9 +690,9 @@ export class JsonConvert {
 
                 // Check if the types match
                 if ( // primitive types match
-                    (expectedJsonType === String && typeof (value) === "string") ||
-                    (expectedJsonType === Number && typeof (value) === "number") ||
-                    (expectedJsonType === Boolean && typeof (value) === "boolean")
+                    (type === 'string' && typeof (value) === "string") ||
+                    (type === 'number' && typeof (value) === "number") ||
+                    (type === 'boolean' && typeof (value) === "boolean")
                 ) {
                     return value;
                 } else { // primitive types mismatch
@@ -713,7 +714,7 @@ export class JsonConvert {
         }
 
         // Check if attempt and expected was n-d
-        if (expectedJsonType instanceof Array && value instanceof Array) {
+        if (type === 'array' && Array.isArray(value)) {
 
             let array: any[] = [];
 
@@ -742,7 +743,7 @@ export class JsonConvert {
         }
 
         // Check if attempt was 1-d and expected was n-d
-        if (expectedJsonType instanceof Array && value instanceof Object) {
+        if (type === 'array' && value instanceof Object) {
 
             let array: any[] = [];
 
@@ -773,7 +774,7 @@ export class JsonConvert {
         }
 
         // Check if attempt was 1-d and expected was n-d
-        if (expectedJsonType instanceof Array) {
+        if (type === 'array') {
             if (value === null) {
                 if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) return null;
                 else throw new Error("\tReason: Given value is null.");
@@ -782,7 +783,7 @@ export class JsonConvert {
         }
 
         // Check if attempt was n-d and expected as 1-d
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
             throw new Error("\tReason: Given value is array, but expected a non-array type.");
         }
 
@@ -840,15 +841,17 @@ export class JsonConvert {
      *
      * @returns {string} the string representation
      */
-    private getExpectedType(expectedJsonType: any): string {
+    private getExpectedType(expectedJsonType: any, showIncludeValuesWhenArray = false): string {
+        if (Array.isArray(expectedJsonType)) {
+            let type = 'array';
+            if (!showIncludeValuesWhenArray) {
+                return type;
+            }
 
-        let type: string = "";
-
-        if (expectedJsonType instanceof Array) {
             type = "[";
             for (let i = 0; i < expectedJsonType.length; i++) {
                 if (i > 0) type += ",";
-                type += this.getExpectedType(expectedJsonType[i]);
+                type += this.getExpectedType(expectedJsonType[i], showIncludeValuesWhenArray);
             }
             type += "]";
             return type;
@@ -881,7 +884,7 @@ export class JsonConvert {
 
         let type: string = "";
 
-        if (jsonValue instanceof Array) {
+        if (Array.isArray(jsonValue)) {
             type = "[";
             for (let i = 0; i < jsonValue.length; i++) {
                 if (i > 0) type += ",";
