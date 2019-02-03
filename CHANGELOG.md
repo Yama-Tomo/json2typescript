@@ -1,3 +1,12 @@
+# v1.0.9 (2019-02-03)
+
+* track original repo changes
+
+> ## Features
+> * Added generics in order to allow the compiler to detect types, closes [#73](https://github.com/dhlab-basel/json2typescript/issues/73)
+> ## Breaking Changes
+> * It is not possible to serialize `undefined` anymore; instead, an error is thrown. Before this version, `json2typescript` serialized `undefined` to `null`.
+
 # v1.0.8 (2019-02-01)
 
 ## Features
