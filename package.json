@@ -23,7 +23,8 @@
   "scripts": {
     "test": "karma start karma.conf.js",
     "build": "npm run test && tsc",
-    "dist": "npm run build && npm pack"
+    "dist": "npm run build && npm pack",
+    "prepare": "tsc"
   },
   "typescript": {
     "definition": "src/index.d.ts"
