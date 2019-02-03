@@ -1,6 +1,6 @@
 {
   "name": "json2typescript",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Provides TypeScript methods to map a JSON object to a JavaScript object on runtime",
   "keywords": [
     "convert",
@@ -23,7 +23,8 @@
   "scripts": {
     "test": "karma start karma.conf.js",
     "build": "npm run test && tsc",
-    "dist": "npm run build && npm pack"
+    "dist": "npm run build && npm pack",
+    "prepare": "tsc"
   },
   "typescript": {
     "definition": "src/index.d.ts"
