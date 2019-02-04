@@ -6,6 +6,8 @@ import { Dog } from "./model/typescript/dog";
 import { IHuman } from "./model/json/i-human";
 import { ICat } from "./model/json/i-cat";
 import { IDog } from "./model/json/i-dog";
+import { IEmployee } from './model/json/i-employee';
+import { Employee } from './model/typescript/employee';
 
 describe('Integration tests', () => {
 
@@ -78,6 +80,12 @@ describe('Integration tests', () => {
         let animals = [cat1, dog1];
         let cats = [cat1, cat2];
 
+        const employee = new Employee();
+        employee.id = 1000;
+        employee.firstName = 'Ichiro';
+        employee._lastName = 'Suzuki';
+
+        const employeeJsonObj: IEmployee = { id: 1000, first_name: 'Ichiro', last_name: 'Suzuki' };
 
         // SERIALIZE INTEGRATION
         describe('serialize', () => {
@@ -91,6 +99,7 @@ describe('Integration tests', () => {
                 expect(jsonConvert.serializeObject(cat1)).toEqual(cat1JsonObject);
                 expect(jsonConvert.serializeObject(cat2)).toEqual(cat2JsonObject);
                 expect(jsonConvert.serializeObject(dog1)).toEqual(dog1JsonObject);
+                expect(jsonConvert.serializeObject(employee)).toEqual(employeeJsonObj);
 
                 expect(() => jsonConvert.serializeArray(<any> cat1)).toThrow();
             });
@@ -118,6 +127,7 @@ describe('Integration tests', () => {
                 expect(jsonConvert.deserializeObject(cat1JsonObject, Cat)).toEqual(cat1);
                 expect(jsonConvert.deserializeObject(cat2JsonObject, Cat)).toEqual(cat2);
                 expect(jsonConvert.deserializeObject(dog1JsonObject, Dog)).toEqual(dog1);
+                expect(jsonConvert.deserializeObject(employeeJsonObj, Employee)).toEqual(employee);
 
                 expect(() => jsonConvert.deserializeArray(<any> cat1JsonObject, Cat)).toThrow();
 
