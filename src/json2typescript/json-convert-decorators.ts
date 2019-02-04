@@ -10,6 +10,12 @@ export function JsonConverter(target: any) {
     target[Settings.MAPPER_PROPERTY] = "";
 }
 
+interface JsonObjectOptions {
+    classIdentifier?: string;
+}
+
+const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'object';
+
 /**
  * Decorator of a class that comes from a JSON object.
  *
@@ -19,7 +25,7 @@ export function JsonConverter(target: any) {
  *
  * @throws Error
  */
-export function JsonObject(target?: string | any): any {
+export function JsonObject(target?: string | JsonObjectOptions | any): any {
     // target is the constructor or the custom class name
 
     let classIdentifier = "";
@@ -65,8 +71,15 @@ export function JsonObject(target?: string | any): any {
         case "undefined":
             return decorator;
 
-        // Decorator was @JsonObject(123)
+        // Decorator was @JsonObject({ classIdentifier: 'classId'.... or @JsonObject(123)
         default:
+            if (isJsonObjectOptions(target)) {
+                if (target.classIdentifier) {
+                    classIdentifier = target.classIdentifier;
+                }
+
+                return decorator;
+            }
 
             throw new Error(
                 "Fatal error in JsonConvert. " +
