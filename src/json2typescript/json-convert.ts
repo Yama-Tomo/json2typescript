@@ -567,7 +567,7 @@ export class JsonConvert {
 
 
         // Get expected and real values
-        let jsonPropertyName: string[] = mappingOptions.jsonPropertyName;
+        const jsonPropertyName = mappingOptions.jsonPropertyName[0];
         let expectedJsonType: any = mappingOptions.expectedJsonType;
         let isOptional: boolean = mappingOptions.isOptional;
         let customConverter: any = mappingOptions.customConverter;
@@ -592,7 +592,7 @@ export class JsonConvert {
         // Map the property
         try {
             // Each class property might have multiple decorators - only use the JSON property name as defined in the first one
-            json[jsonPropertyName[0]] = customConverter !== null ? customConverter.serialize(classInstancePropertyValue) : this.verifyProperty(expectedJsonType, classInstancePropertyValue, true);
+            json[jsonPropertyName] = customConverter !== null ? customConverter.serialize(classInstancePropertyValue) : this.verifyProperty(expectedJsonType, classInstancePropertyValue, true);
         } catch (e) {
             throw new Error(
                 "Fatal error in JsonConvert. " +
@@ -624,7 +624,7 @@ export class JsonConvert {
         }
 
         // Get expected and real values
-        let jsonPropertyName: string[] = mappingOptions.jsonPropertyName;
+        const jsonPropertyName = mappingOptions.jsonPropertyName[0];
         let expectedJsonType: any = mappingOptions.expectedJsonType;
         let isOptional: boolean = mappingOptions.isOptional;
         let customConverter: any = mappingOptions.customConverter;
