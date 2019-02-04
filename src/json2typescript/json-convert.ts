@@ -1,6 +1,7 @@
 import { OperationMode, PropertyMatchingRule, ValueCheckingMode } from "./json-convert-enums";
 import { MappingOptions, Settings } from "./json-convert-options";
 import { Any } from "./any";
+import * as lodash from 'lodash';
 
 /**
  * Offers a simple API for mapping JSON objects to TypeScript/JavaScript classes and vice versa.
@@ -565,9 +566,13 @@ export class JsonConvert {
             return;
         }
 
+        const isConvertSnakeCase = instance[Settings.CLASS_OPTIONS_ENABLE_AUTO_SNAKE_CASE_MAP] &&
+          !mappingOptions.isPropertyNameGiven;
 
         // Get expected and real values
-        const jsonPropertyName = mappingOptions.jsonPropertyName[0];
+        const jsonPropertyName = isConvertSnakeCase ?
+          lodash.snakeCase(mappingOptions.jsonPropertyName[0]) : mappingOptions.jsonPropertyName[0];
+
         let expectedJsonType: any = mappingOptions.expectedJsonType;
         let isOptional: boolean = mappingOptions.isOptional;
         let customConverter: any = mappingOptions.customConverter;
@@ -623,26 +628,24 @@ export class JsonConvert {
             return;
         }
 
+        const isConvertSnakeCase = instance[Settings.CLASS_OPTIONS_ENABLE_AUTO_SNAKE_CASE_MAP] &&
+          !mappingOptions.isPropertyNameGiven;
+
         // Get expected and real values
-        const jsonPropertyName = mappingOptions.jsonPropertyName[0];
+        const jsonPropertyName = isConvertSnakeCase ?
+          lodash.snakeCase(mappingOptions.jsonPropertyName[0]) : mappingOptions.jsonPropertyName[0];
+
         let expectedJsonType: any = mappingOptions.expectedJsonType;
         let isOptional: boolean = mappingOptions.isOptional;
         let customConverter: any = mappingOptions.customConverter;
 
-        let jsonValue: any = undefined;
-
-
-        // Loop all properties and try to find the value for it
-        for (const n of jsonPropertyName) {
-
+        const jsonValue = (() => {
             try {
-                jsonValue = this.getObjectValue(json, n);
-                break;
-            } catch {
+                return this.getObjectValue(json, jsonPropertyName);
+            } catch (e) {
+                return undefined;
             }
-
-        }
-
+        })();
 
         // Check if the json value exists
         if (typeof (jsonValue) === "undefined") {
