@@ -10,6 +10,13 @@ export function JsonConverter(target: any) {
     target[Settings.MAPPER_PROPERTY] = "";
 }
 
+interface JsonObjectOptions {
+    classIdentifier?: string;
+    enableAutoSnakeCaseMap?: boolean;
+}
+
+const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'object';
+
 /**
  * Decorator of a class that comes from a JSON object.
  *
@@ -19,14 +26,16 @@ export function JsonConverter(target: any) {
  *
  * @throws Error
  */
-export function JsonObject(target?: string | any): any {
+export function JsonObject(target?: string | JsonObjectOptions | any): any {
     // target is the constructor or the custom class name
 
     let classIdentifier = "";
+    let enableAutoSnakeCaseMap = false;
 
     const decorator = (target: any): void => {
 
         target.prototype[Settings.CLASS_IDENTIFIER] = classIdentifier.length > 0 ? classIdentifier : target.name;
+        target.prototype[Settings.CLASS_OPTIONS_ENABLE_AUTO_SNAKE_CASE_MAP] = enableAutoSnakeCaseMap;
 
         const mapping: any = target.prototype[Settings.MAPPING_PROPERTY];
 
@@ -65,8 +74,19 @@ export function JsonObject(target?: string | any): any {
         case "undefined":
             return decorator;
 
-        // Decorator was @JsonObject(123)
+        // Decorator was @JsonObject({ classIdentifier: 'classId'.... or @JsonObject(123)
         default:
+            if (isJsonObjectOptions(target)) {
+                if (target.classIdentifier) {
+                    classIdentifier = target.classIdentifier;
+                }
+
+                if (target.enableAutoSnakeCaseMap) {
+                    enableAutoSnakeCaseMap = target.enableAutoSnakeCaseMap;
+                }
+
+                return decorator;
+            }
 
             throw new Error(
                 "Fatal error in JsonConvert. " +
@@ -106,6 +126,7 @@ export function JsonProperty(...params: any[]): any {
         let jsonPropertyName: string = classPropertyName;
         let conversionOption: any = Any;
         let isOptional: boolean = false;
+        let isPropertyNameGiven = true;
 
         switch (params.length) {
             case 1:
@@ -156,9 +177,9 @@ export function JsonProperty(...params: any[]): any {
                 isOptional = params[2];
                 break;
             default:
+                isPropertyNameGiven = false;
                 break;
         }
-
 
         if (typeof(target[Settings.MAPPING_PROPERTY]) === "undefined") {
             target[Settings.MAPPING_PROPERTY] = [];
@@ -168,6 +189,7 @@ export function JsonProperty(...params: any[]): any {
         jsonPropertyMappingOptions.classPropertyName = classPropertyName;
         jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
         jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
+        jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
 
         // Check if conversionOption is a type or a custom converter.
         if (typeof(conversionOption) !== "undefined" && conversionOption !== null && typeof(conversionOption[Settings.MAPPER_PROPERTY]) !== "undefined") {
