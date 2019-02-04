@@ -228,6 +228,15 @@ The class decorators are used infront of the class declaration and do support on
 export class User {}
 ```
 
+or
+
+```typescript
+@JsonObject({ classIdentifier: 'User' })
+export class User {}
+```
+
+you can give an object type.
+
 > Warning: Minification removes the actual names of certain classes. This can
 in certain cases cause the deserializer to not work as same class names will
 overwrite the property descriptors. It is advised to explicitly ID your 
@@ -248,6 +257,30 @@ objects as above.
 The first parameter of `@JsonObject` is meant to be a unique class identifier, usually just the class name.
 In many applications, developers deploy minified code which also minifies class names. 
 Adding a class identifier is highly recommended because it will prevent collision of class names.
+
+#### Other parameters: enableAutoSnakeCaseMap (optional) * given object type only
+
+mapping between snake-case and camel-case is automatically if enableAutoSnakeCaseMap given true and first parameter not given
+
+```json
+{
+  "first_name": "foo",
+  "last_name": "bar"
+}
+```
+
+```typescript
+@JsonObject({ classIdentifier: 'User',  enableAutoSnakeCaseMap: true })
+export class User {
+  // mapped `first_name` of json
+  @JsonProperty()
+  firstName: string = '';
+  // have priority it if first parameter given 
+  @JsonProperty('last_name')
+  _lastName: string = '';
+}
+```
+
 
 ### Property decorators
 
