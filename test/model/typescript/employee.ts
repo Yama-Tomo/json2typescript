@@ -14,6 +14,8 @@ export class Employee {
   public age: number = 0;
   @JsonProperty({ optional: true })
   public hobby: string = '(optional)';
+  @JsonProperty({ type: [Number, String] })
+  public description = { length_of_service: 0, position: '', sub_position: '' };
 }
 
 @JsonObject({ classIdentifier: 'invalidPropertyMapEmployee', enableAutoSnakeCaseMap: true })

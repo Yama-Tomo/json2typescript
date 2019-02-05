@@ -86,6 +86,9 @@ describe('Integration tests', () => {
       if (hobby) {
         _instance.hobby = hobby;
       }
+      _instance.description.length_of_service = 5;
+      _instance.description.position = 'Leader';
+      _instance.description.sub_position = '(none)';
 
       return _instance;
     };
@@ -93,6 +96,7 @@ describe('Integration tests', () => {
     const employeeJsonObj: IEmployee = {
       id: 1000, first_name: 'Ichiro', last_name: 'Suzuki',
       branch_name: 'developer team', age: 30,
+      description: { length_of_service: 5, position: 'Leader', sub_position: '(none)' }
     };
 
     // SERIALIZE INTEGRATION

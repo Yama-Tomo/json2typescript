@@ -5,4 +5,5 @@ export interface IEmployee {
   branch_name: string;
   age: number;
   hobby?: string;
+  description: { length_of_service: number, position: string, sub_position: string };
 }
