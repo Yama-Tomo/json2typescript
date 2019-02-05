@@ -1,5 +1,6 @@
 import { MappingOptions, Settings } from "./json-convert-options";
 import { Any } from "./any";
+import 'reflect-metadata';
 
 /**
  * Decorator of a class that is a custom converter.
@@ -126,10 +127,24 @@ export function JsonProperty(...params: any[]): any {
             isPropertyNameGiven: !!propName,
         });
 
-        const expectedTypeProc = (expectedType?: any) => ({
-            expectedType: expectedType ? expectedType : Any;
-            isExpectedTypeGiven: !!expectedType,
-        });
+        const expectedTypeProc = (expectedType?: any) => {
+            const _expectedType = () => {
+                if (!expectedType) {
+                    const designType = Reflect.getMetadata('design:type', target, classPropertyName);
+                    if (designType.name !== 'Array' && designType.name !== 'Object') {
+                        return designType;
+                    }
+
+                    return Any;
+                }
+                return expectedType;
+            };
+
+            return {
+                expectedType: _expectedType(),
+                isExpectedTypeGiven: !!expectedType,
+            }
+        };
 
         const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
             const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
