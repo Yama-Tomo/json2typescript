@@ -10,13 +10,6 @@ export function JsonConverter(target: any) {
     target[Settings.MAPPER_PROPERTY] = "";
 }
 
-interface JsonObjectOptions {
-    classIdentifier?: string;
-    enableAutoSnakeCaseMap?: boolean;
-}
-
-const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'object';
-
 /**
  * Decorator of a class that comes from a JSON object.
  *
@@ -26,7 +19,10 @@ const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'ob
  *
  * @throws Error
  */
-export function JsonObject(target?: string | JsonObjectOptions | any): any {
+interface JsonObjectObjectTypeArg { classIdentifier?: string; enableAutoSnakeCaseMap?: boolean; }
+const isJsonObjectOptions = (v: any): v is JsonObjectObjectTypeArg => typeof v === 'object';
+
+export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any {
     // target is the constructor or the custom class name
 
     let classIdentifier = "";
