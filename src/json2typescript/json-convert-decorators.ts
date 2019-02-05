@@ -112,6 +112,10 @@ export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any
  *
  * @returns {(target:any, classPropertyName:string)=>void}
  */
+interface JsonPropertyObjectTypeArg { propName?: string, type?: any, optional?: boolean }
+
+export function JsonProperty(propName?: string, expectedType?: any, isOptional?: boolean): any;
+export function JsonProperty(params?: JsonPropertyObjectTypeArg): any;
 export function JsonProperty(...params: any[]): any {
 
     return function (target: any, classPropertyName: string): void {
@@ -128,11 +132,22 @@ export function JsonProperty(...params: any[]): any {
         });
 
         const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
-           return {
-             ...propNameProc(params[0]),
-             ...expectedTypeProc(params[1]),
-             ...{ isOptional: !!params[2] }
-           };
+            const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
+            if (isObjectTypeArgGiven) {
+                const param = params[0] as JsonPropertyObjectTypeArg;
+
+                return {
+                  ...propNameProc(param.propName),
+                  ...expectedTypeProc(param.type),
+                  ...{ isOptional: !!param.optional }
+                };
+            } else {
+                return {
+                  ...propNameProc(params[0]),
+                  ...expectedTypeProc(params[1]),
+                  ...{ isOptional: !!params[2] }
+                };
+            }
         })();
 
         if (typeof(target[Settings.MAPPING_PROPERTY]) === "undefined") {
