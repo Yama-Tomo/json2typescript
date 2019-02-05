@@ -123,11 +123,11 @@ export function JsonProperty(...params: any[]): any {
         });
 
         const expectedTypeProc = (expectedType?: any) => ({
-            conversionOption: expectedType ? expectedType : Any;
+            expectedType: expectedType ? expectedType : Any;
             isExpectedTypeGiven: !!expectedType,
         });
 
-        const { jsonPropertyName, conversionOption, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
+        const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
            return {
              ...propNameProc(params[0]),
              ...expectedTypeProc(params[1]),
@@ -145,11 +145,11 @@ export function JsonProperty(...params: any[]): any {
         jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
         jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
 
-        // Check if conversionOption is a type or a custom converter.
-        if (typeof(conversionOption) !== "undefined" && conversionOption !== null && typeof(conversionOption[Settings.MAPPER_PROPERTY]) !== "undefined") {
-            jsonPropertyMappingOptions.customConverter = new conversionOption();
+        // Check if expectedType is a type or a custom converter.
+        if (typeof(expectedType) !== "undefined" && expectedType !== null && typeof(expectedType[Settings.MAPPER_PROPERTY]) !== "undefined") {
+            jsonPropertyMappingOptions.customConverter = new expectedType();
         } else {
-            jsonPropertyMappingOptions.expectedJsonType = conversionOption;
+            jsonPropertyMappingOptions.expectedJsonType = expectedType;
         }
 
         // Save the mapping info
