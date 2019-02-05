@@ -111,71 +111,29 @@ export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any
  * @param isOptional optional param (default: false), if true, the json property does not have to be present in the object
  *
  * @returns {(target:any, classPropertyName:string)=>void}
- *
- * @throws Error
  */
 export function JsonProperty(...params: any[]): any {
 
     return function (target: any, classPropertyName: string): void {
         // target is the class
 
-        let jsonPropertyName: string = classPropertyName;
-        let conversionOption: any = Any;
-        let isOptional: boolean = false;
-        let isPropertyNameGiven = true;
+        const propNameProc = (propName?: string) => ({
+            jsonPropertyName: propName ? propName : classPropertyName,
+            isPropertyNameGiven: !!propName,
+        });
 
-        switch (params.length) {
-            case 1:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                jsonPropertyName = params[0];
-                break;
-            case 2:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                if (params[1] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as second parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Use \"Any\" to allow any type. You can import this class from \"json2typescript\".\n\n"
-                );
-                jsonPropertyName = params[0];
-                conversionOption = params[1];
-                break;
-            case 3:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                if (params[1] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as second parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Use \"Any\" to allow any type. You can import this class from \"json2typescript\".\n\n"
-                );
-                jsonPropertyName = params[0];
-                conversionOption = params[1];
-                isOptional = params[2];
-                break;
-            default:
-                isPropertyNameGiven = false;
-                break;
-        }
+        const expectedTypeProc = (expectedType?: any) => ({
+            conversionOption: expectedType ? expectedType : Any;
+            isExpectedTypeGiven: !!expectedType,
+        });
+
+        const { jsonPropertyName, conversionOption, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
+           return {
+             ...propNameProc(params[0]),
+             ...expectedTypeProc(params[1]),
+             ...{ isOptional: !!params[2] }
+           };
+        })();
 
         if (typeof(target[Settings.MAPPING_PROPERTY]) === "undefined") {
             target[Settings.MAPPING_PROPERTY] = [];
