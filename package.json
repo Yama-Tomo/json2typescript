@@ -33,16 +33,15 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@types/jasmine": "^3.3.7",
+    "@types/jasmine": "^3.3.8",
     "@types/lodash": "^4.14.120",
-    "jasmine": "3.3.1",
-    "karma": "^3.1.4",
-    "karma-jasmine": "2.0.1",
-    "karma-mocha-reporter": "^2.2.3",
-    "karma-phantomjs-launcher": "1.0.4",
-    "karma-typescript": "^3.0.13",
+    "karma": "^4.0.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-typescript": "^4.0.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "typescript": "3.2.4"
+    "typescript": "^3.3.1"
   },
   "main": "index.js",
   "files": [
