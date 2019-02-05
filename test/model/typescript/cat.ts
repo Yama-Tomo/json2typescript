@@ -1,20 +1,15 @@
-import { JsonObject, JsonProperty } from "../../../src/json2typescript/json-convert-decorators";
+import { JsonObject, JsonProperty } from '../../../src/json2typescript/json-convert-decorators';
 
-import { Animal } from "./animal";
+import { Animal } from './animal';
 
-@JsonObject("Kitty")
+@JsonObject('Kitty')
 export class Cat extends Animal {
-
-    @JsonProperty("catName", String)
-    name: string = "";
-
-    @JsonProperty()
-    district: number = 0;
-
-    @JsonProperty()
-    talky: boolean = false;
-
-    @JsonProperty("other", String)
-    other: string = "";
-
+  @JsonProperty('catName', String)
+  public name: string = '';
+  @JsonProperty()
+  public district: number = 0;
+  @JsonProperty()
+  public talky: boolean = false;
+  @JsonProperty('other', String)
+  public other: string = '';
 }

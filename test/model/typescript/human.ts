@@ -1,24 +1,23 @@
-import {JsonObject, JsonProperty} from "../../../src/json2typescript/json-convert-decorators";
+import { JsonObject, JsonProperty } from '../../../src/json2typescript/json-convert-decorators';
 
 @JsonObject()
 export class Human {
+  @JsonProperty('givenName', String)
+  public firstname: string = '';
 
-    @JsonProperty("givenName", String)
-    firstname: string = "";
+  @JsonProperty('lastName', String)
+  @JsonProperty('name', String)
+  @JsonProperty('secondName', String)
+  public lastname: string = '';
 
-    @JsonProperty("lastName", String)
-    @JsonProperty("name", String)
-    @JsonProperty("secondName", String)
-    lastname: string = "";
-
-    get name(): string {
-        if (this.firstname.length > 0 && this.lastname.length > 0) {
-            return this.firstname + " " + this.lastname;
-        } else {
-            return "";
-        }
+  get name(): string {
+    if (this.firstname.length > 0 && this.lastname.length > 0) {
+      return this.firstname + ' ' + this.lastname;
+    } else {
+      return '';
     }
+  }
 
-    constructor() {}
-
+  constructor() {
+  }
 }
