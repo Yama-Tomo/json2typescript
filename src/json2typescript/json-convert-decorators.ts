@@ -1,5 +1,5 @@
-import { MappingOptions, Settings } from "./json-convert-options";
-import { Any } from "./any";
+import { MappingOptions, Settings } from './json-convert-options';
+import { Any } from './any';
 import 'reflect-metadata';
 
 /**
@@ -8,7 +8,7 @@ import 'reflect-metadata';
  * @param target the class
  */
 export function JsonConverter(target: any) {
-    target[Settings.MAPPER_PROPERTY] = "";
+  target[Settings.MAPPER_PROPERTY] = '';
 }
 
 /**
@@ -20,79 +20,67 @@ export function JsonConverter(target: any) {
  *
  * @throws Error
  */
-interface JsonObjectObjectTypeArg { classIdentifier?: string; enableAutoSnakeCaseMap?: boolean; }
-const isJsonObjectOptions = (v: any): v is JsonObjectObjectTypeArg => typeof v === 'object';
+interface JsonObjectObjectTypeArg {
+  classIdentifier?: string;
+  enableAutoSnakeCaseMap?: boolean;
+}
 
-export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any {
-    // target is the constructor or the custom class name
+const isJsonObjectObjectTypeArg = (v: any): v is JsonObjectObjectTypeArg => typeof v === 'object';
 
-    let classIdentifier = "";
-    let enableAutoSnakeCaseMap = false;
+export function JsonObject(param?: string|JsonObjectObjectTypeArg|any): any {
+  const decorator = (target: any): void => {
+    target.prototype[Settings.CLASS_IDENTIFIER] = classIdentifier(target);
+    target.prototype[Settings.CLASS_OPTIONS_ENABLE_AUTO_SNAKE_CASE_MAP] = enableAutoSnakeCaseMap;
 
-    const decorator = (target: any): void => {
+    const mapping: any = target.prototype[Settings.MAPPING_PROPERTY];
 
-        target.prototype[Settings.CLASS_IDENTIFIER] = classIdentifier.length > 0 ? classIdentifier : target.name;
-        target.prototype[Settings.CLASS_OPTIONS_ENABLE_AUTO_SNAKE_CASE_MAP] = enableAutoSnakeCaseMap;
-
-        const mapping: any = target.prototype[Settings.MAPPING_PROPERTY];
-
-        // Make sure we replace the mapping names of all properties of this class
-        if (!mapping) return;
-
-        const unmappedKeys = Object.keys(mapping)
-            .filter((val) => val.indexOf(`${Settings.CLASS_IDENTIFIER}.`) === 0);
-
-        for (const key of unmappedKeys) {
-            mapping[key.replace(Settings.CLASS_IDENTIFIER, target.prototype[Settings.CLASS_IDENTIFIER])] =
-                mapping[key];
-
-            // We must delete the mapping without associated class since it will
-            // cause issues with inheritance of mappings and overrides.
-            delete mapping[key];
-        }
-
-    };
-
-    const type: string = typeof target;
-
-    switch (type) {
-
-        // Decorator was @JsonObject(classId)
-        case "string":
-            classIdentifier = target;
-            return decorator;
-
-        // Decorator was @JsonObject
-        case "function":
-            decorator(target);
-            return;
-
-        // Decorator was @JsonObject()
-        case "undefined":
-            return decorator;
-
-        // Decorator was @JsonObject({ classIdentifier: 'classId'.... or @JsonObject(123)
-        default:
-            if (isJsonObjectOptions(target)) {
-                if (target.classIdentifier) {
-                    classIdentifier = target.classIdentifier;
-                }
-
-                if (target.enableAutoSnakeCaseMap) {
-                    enableAutoSnakeCaseMap = target.enableAutoSnakeCaseMap;
-                }
-
-                return decorator;
-            }
-
-            throw new Error(
-                "Fatal error in JsonConvert. " +
-                "It's mandatory to pass a string as parameter in the @JsonObject decorator.\n\n" +
-                "Use either @JsonObject or @JsonObject(classId) where classId is a string.\n\n"
-            );
-
+    // Make sure we replace the mapping names of all properties of this class
+    if (!mapping) {
+      return;
     }
 
+    const unmappedKeys = Object.keys(mapping)
+      .filter((val) => val.indexOf(`${Settings.CLASS_IDENTIFIER}.`) === 0);
+
+    for (const key of unmappedKeys) {
+      mapping[key.replace(Settings.CLASS_IDENTIFIER, target.prototype[Settings.CLASS_IDENTIFIER])] = mapping[key];
+
+      // We must delete the mapping without associated class since it will
+      // cause issues with inheritance of mappings and overrides.
+      delete mapping[key];
+    }
+  };
+
+
+  // target is the constructor or the custom class name
+  const classIdentifier = (target: any) => {
+    if (typeof param === 'string') {
+      return param;
+    }
+
+    if (isJsonObjectObjectTypeArg(param) && param.classIdentifier) {
+      return param.classIdentifier;
+    }
+
+    return target.name as string;
+  };
+
+  const enableAutoSnakeCaseMap = isJsonObjectObjectTypeArg(param) && param.enableAutoSnakeCaseMap;
+
+  const type: string = typeof param;
+  if (type === 'string' || type === 'undefined' || isJsonObjectObjectTypeArg(param)) {
+    return decorator;
+  }
+
+  if (type === 'function') {
+    return decorator(param);
+  }
+
+  throw new Error(
+    'Fatal error in JsonConvert. ' +
+    'It\'s mandatory to pass a string as parameter in the @JsonObject decorator.\n\n' +
+    'Use either @JsonObject or @JsonObject(classId) where classId is a string.\n\n',
+  );
 }
 
 /**
@@ -113,84 +101,88 @@ export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any
  *
  * @returns {(target:any, classPropertyName:string)=>void}
  */
-interface JsonPropertyObjectTypeArg { propName?: string, type?: any, optional?: boolean }
+interface JsonPropertyObjectTypeArg {
+  propName?: string;
+  type?: any;
+  optional?: boolean;
+}
 
 export function JsonProperty(propName?: string, expectedType?: any, isOptional?: boolean): any;
 export function JsonProperty(params?: JsonPropertyObjectTypeArg): any;
 export function JsonProperty(...params: any[]): any {
+  return (target: any, classPropertyName: string): void => {
+    // target is the class
+    const getPropName = (propName?: string) => ({
+      jsonPropertyName: propName ? propName : classPropertyName,
+      isPropertyNameGiven: !!propName,
+    });
 
-    return function (target: any, classPropertyName: string): void {
-        // target is the class
+    const getExpectedType = (type?: any) => {
+      const _expectedType = () => {
+        if (type) {
+          return type;
+        }
 
-        const propNameProc = (propName?: string) => ({
-            jsonPropertyName: propName ? propName : classPropertyName,
-            isPropertyNameGiven: !!propName,
-        });
+        const designType = Reflect.getMetadata('design:type', target, classPropertyName);
+        if (designType.name !== 'Array' && designType.name !== 'Object') {
+          return designType;
+        }
+        return Any;
+      };
 
-        const expectedTypeProc = (expectedType?: any) => {
-            const _expectedType = () => {
-                if (!expectedType) {
-                    const designType = Reflect.getMetadata('design:type', target, classPropertyName);
-                    if (designType.name !== 'Array' && designType.name !== 'Object') {
-                        return designType;
-                    }
+      return {
+        expectedType: _expectedType(),
+        isExpectedTypeGiven: !!type,
+      };
+    };
 
-                    return Any;
-                }
-                return expectedType;
-            };
+    const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
+      const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
+      if (isObjectTypeArgGiven) {
+        const param = params[0] as JsonPropertyObjectTypeArg;
 
-            return {
-                expectedType: _expectedType(),
-                isExpectedTypeGiven: !!expectedType,
-            }
+        return {
+          ...getPropName(param.propName),
+          ...getExpectedType(param.type),
+          ...{ isOptional: !!param.optional },
         };
+      } else {
+        return {
+          ...getPropName(params[0]),
+          ...getExpectedType(params[1]),
+          ...{ isOptional: !!params[2] },
+        };
+      }
+    })();
 
-        const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
-            const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
-            if (isObjectTypeArgGiven) {
-                const param = params[0] as JsonPropertyObjectTypeArg;
-
-                return {
-                  ...propNameProc(param.propName),
-                  ...expectedTypeProc(param.type),
-                  ...{ isOptional: !!param.optional }
-                };
-            } else {
-                return {
-                  ...propNameProc(params[0]),
-                  ...expectedTypeProc(params[1]),
-                  ...{ isOptional: !!params[2] }
-                };
-            }
-        })();
-
-        if (typeof(target[Settings.MAPPING_PROPERTY]) === "undefined") {
-            target[Settings.MAPPING_PROPERTY] = [];
-        }
-
-        const jsonPropertyMappingOptions = new MappingOptions();
-        jsonPropertyMappingOptions.classPropertyName = classPropertyName;
-        jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
-        jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
-        jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
-
-        // Check if expectedType is a type or a custom converter.
-        if (typeof(expectedType) !== "undefined" && expectedType !== null && typeof(expectedType[Settings.MAPPER_PROPERTY]) !== "undefined") {
-            jsonPropertyMappingOptions.customConverter = new expectedType();
-        } else {
-            jsonPropertyMappingOptions.expectedJsonType = expectedType;
-        }
-
-        // Save the mapping info
-        if (typeof(target[Settings.MAPPING_PROPERTY][Settings.CLASS_IDENTIFIER + "." + classPropertyName]) === "undefined") {
-            // First decorator for this classProperty
-            target[Settings.MAPPING_PROPERTY][Settings.CLASS_IDENTIFIER + "." + classPropertyName] = jsonPropertyMappingOptions;
-        } else {
-            // Second decorator - just add the alternative JSON-name for this classProperty
-            target[Settings.MAPPING_PROPERTY][Settings.CLASS_IDENTIFIER + "." + classPropertyName].jsonPropertyName.unshift(jsonPropertyName);
-        }
-
+    if (typeof target[Settings.MAPPING_PROPERTY] === 'undefined') {
+      target[Settings.MAPPING_PROPERTY] = [];
     }
 
+    const jsonPropertyMappingOptions = new MappingOptions();
+    jsonPropertyMappingOptions.classPropertyName = classPropertyName;
+    jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
+    jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
+    jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
+
+    // Check if expectedType is a type or a custom converter.
+    const hasCustomConverter = typeof expectedType !== 'undefined' && expectedType !== null &&
+      typeof expectedType[Settings.MAPPER_PROPERTY] !== 'undefined';
+    if (hasCustomConverter) {
+      jsonPropertyMappingOptions.customConverter = new expectedType();
+    } else {
+      jsonPropertyMappingOptions.expectedJsonType = expectedType;
+    }
+
+    // Save the mapping info
+    const mappingName = Settings.CLASS_IDENTIFIER + '.' + classPropertyName;
+    const isAlreadyDecorate = typeof target[Settings.MAPPING_PROPERTY][mappingName] !== 'undefined';
+    if (!isAlreadyDecorate) {
+      // First decorator for this classProperty
+      target[Settings.MAPPING_PROPERTY][mappingName] = jsonPropertyMappingOptions;
+    } else {
+      // Second decorator - just add the alternative JSON-name for this classProperty
+      target[Settings.MAPPING_PROPERTY][mappingName].jsonPropertyName.unshift(jsonPropertyName);
+    }
+  };
 }
