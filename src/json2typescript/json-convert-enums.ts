@@ -10,10 +10,10 @@
  * @see https://www.npmjs.com/package/json2typescript full documentation
  */
 export enum OperationMode {
-    DISABLE = 0,
-    ENABLE = 1,
-    LOGGING = 2
-};
+  DISABLE = 0,
+  ENABLE = 1,
+  LOGGING = 2,
+}
 
 /**
  * Enum for the property matching mode of a JsonConvert instance.
@@ -26,9 +26,9 @@ export enum OperationMode {
  * @see https://www.npmjs.com/package/json2typescript full documentation
  */
 export enum PropertyMatchingRule {
-    CASE_STRICT = 1,
-    CASE_INSENSITIVE = 2
-};
+  CASE_STRICT = 1,
+  CASE_INSENSITIVE = 2,
+}
 
 /**
  * Enum for the value checking mode of a JsonConvert instance.
@@ -42,7 +42,7 @@ export enum PropertyMatchingRule {
  * @see https://www.npmjs.com/package/json2typescript full documentation
  */
 export enum ValueCheckingMode {
-    ALLOW_NULL = 1,
-    ALLOW_OBJECT_NULL = 2,
-    DISALLOW_NULL = 3
-};
+  ALLOW_NULL = 1,
+  ALLOW_OBJECT_NULL = 2,
+  DISALLOW_NULL = 3,
+}
