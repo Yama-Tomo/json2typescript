@@ -29,7 +29,9 @@
   "typescript": {
     "definition": "src/index.d.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
+  },
   "devDependencies": {
     "@types/jasmine": "^3.3.7",
     "@types/lodash": "^4.14.120",
