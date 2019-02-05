@@ -1,3 +1,10 @@
+# v2.0.1 (2019-02-05)
+
+## Features
+
+* using the declared the type of property of typescript if not given `expectedType` [#4](https://github.com/Yama-Tomo/json2typescript/pull/6)
+* mapping between snake-case and camel-case automatically [#3](https://github.com/Yama-Tomo/json2typescript/pull/4)
+
 # v1.0.9 (2019-02-03)
 
 * track original repo changes (v1.1.0)
