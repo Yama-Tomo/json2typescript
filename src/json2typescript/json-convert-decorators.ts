@@ -181,7 +181,7 @@ export function JsonProperty(...params: any[]): any {
             target[Settings.MAPPING_PROPERTY] = [];
         }
 
-        let jsonPropertyMappingOptions = new MappingOptions();
+        const jsonPropertyMappingOptions = new MappingOptions();
         jsonPropertyMappingOptions.classPropertyName = classPropertyName;
         jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
         jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
