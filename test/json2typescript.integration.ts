@@ -7,7 +7,7 @@ import { IHuman } from "./model/json/i-human";
 import { ICat } from "./model/json/i-cat";
 import { IDog } from "./model/json/i-dog";
 import { IEmployee } from './model/json/i-employee';
-import { Employee } from './model/typescript/employee';
+import * as Emp from './model/typescript/employee';
 
 describe('Integration tests', () => {
 
@@ -80,12 +80,24 @@ describe('Integration tests', () => {
         let animals = [cat1, dog1];
         let cats = [cat1, cat2];
 
-        const employee = new Employee();
-        employee.id = 1000;
-        employee.firstName = 'Ichiro';
-        employee._lastName = 'Suzuki';
+        const employee = (hobby?: string) => {
+            const _instance = new Emp.Employee();
+            _instance.id = 1000;
+            _instance.firstName = 'Ichiro';
+            _instance._lastName = 'Suzuki';
+            _instance.branchName = 'developer team';
+            _instance.age = 30;
+            if (hobby) {
+                _instance.hobby = hobby;
+            }
 
-        const employeeJsonObj: IEmployee = { id: 1000, first_name: 'Ichiro', last_name: 'Suzuki' };
+            return _instance;
+        };
+
+        const employeeJsonObj: IEmployee = {
+            id: 1000, first_name: 'Ichiro', last_name: 'Suzuki',
+            branch_name: 'developer team', age: 30,
+        };
 
         // SERIALIZE INTEGRATION
         describe('serialize', () => {
@@ -99,7 +111,7 @@ describe('Integration tests', () => {
                 expect(jsonConvert.serializeObject(cat1)).toEqual(cat1JsonObject);
                 expect(jsonConvert.serializeObject(cat2)).toEqual(cat2JsonObject);
                 expect(jsonConvert.serializeObject(dog1)).toEqual(dog1JsonObject);
-                expect(jsonConvert.serializeObject(employee)).toEqual(employeeJsonObj);
+                expect(jsonConvert.serializeObject(employee())).toEqual({...employeeJsonObj, ...{ hobby: '(optional)' }});
 
                 expect(() => jsonConvert.serializeArray(<any> cat1)).toThrow();
             });
@@ -127,7 +139,7 @@ describe('Integration tests', () => {
                 expect(jsonConvert.deserializeObject(cat1JsonObject, Cat)).toEqual(cat1);
                 expect(jsonConvert.deserializeObject(cat2JsonObject, Cat)).toEqual(cat2);
                 expect(jsonConvert.deserializeObject(dog1JsonObject, Dog)).toEqual(dog1);
-                expect(jsonConvert.deserializeObject(employeeJsonObj, Employee)).toEqual(employee);
+                expect(jsonConvert.deserializeObject(employeeJsonObj, Emp.Employee)).toEqual(employee());
 
                 expect(() => jsonConvert.deserializeArray(<any> cat1JsonObject, Cat)).toThrow();
 
@@ -140,6 +152,14 @@ describe('Integration tests', () => {
                 expect(() => jsonConvert.deserializeObject(catsJsonArray, Cat)).toThrow();
             });
 
+            it('should throw error TypeScript property not exists in JSON', () => {
+                expect(() => jsonConvert.deserializeObject(employeeJsonObj, Emp.NoSuchPropertyEmployee)).toThrow();
+                expect(() => jsonConvert.deserializeObject(employeeJsonObj, Emp.NoSuchPropertyObjectTypeArgEmployee)).toThrow();
+            });
+
+            it('should throw error TypeScript property type mismatch in JSON', () => {
+                expect(() => jsonConvert.deserializeObject(employeeJsonObj, Emp.InvalidPropertyTypeEmployee)).toThrow();
+            });
         });
 
     });

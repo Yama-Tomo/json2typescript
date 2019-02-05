@@ -294,12 +294,24 @@ export class User {
 }
 ```
 
+or
+
+```typescript
+@JsonObject("User")
+export class User {
+    @JsonProperty({ propName: "jsonPropertyName", type: String, optional: true })
+    name: string = undefined;
+}
+```
+you can give an object type.
+
 Important note: You must assign any (valid) value or `undefined` to your property at 
 initialization, otherwise our mapper does **not** work.
 
 > Tip: Make sure you import `JsonObject` and `JsonProperty` from `json2typescript`.
 
 #### First parameter: jsonProperty
+###### name: propName (optional) `if object type given`
 
 The first parameter of `@JsonProperty` is the JSON object property name. 
 It happens that the property names given by the server are very ugly.
@@ -307,6 +319,7 @@ Here you can map any json property name to the `User` property `name`.
 In our case, `json["jsonPropertyName"]` gets mapped to `user.name`.
 
 #### Second parameter (optional): conversionOption
+###### name: type (optional) `if object type given`
 
 The second parameter of `@JsonProperty` describes what happens when doing the mapping between JSON and TypeScript objects.
 This parameter is optional; the default value is `Any` (which means no type check is done when the mapping happens).
@@ -341,6 +354,19 @@ At first, our array notation on the left looks odd.
 But this notation allows you to define even nested arrays. 
 See the examples at the end of this document for more info about nesting arrays.
 
+not nested array String, Number, Boolean and CustomClass is can be shorthand.
+however, require declare the type of property.
+
+```typescript
+@JsonProperty()
+name = '';          // not working. expected type is `Any`
+
+@JsonProperty()
+name: string = '';  // working. expected type is `String`
+```
+
+Important note: this not support Array and union type.
+
 ##### Adding a custom converter
 
 More advanced users may need to use custom converters. If you don't want
@@ -365,6 +391,7 @@ export class User {
 ```
 
 #### Third parameter (optional): isOptional
+###### name: optional (optional) `if object type given`
 
 The third parameter of `@JsonProperty` determines whether the `jsonProperty` has to be present in the json.
 This parameter is optional; the default value is false.

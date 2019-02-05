@@ -1,5 +1,6 @@
 import { MappingOptions, Settings } from "./json-convert-options";
 import { Any } from "./any";
+import 'reflect-metadata';
 
 /**
  * Decorator of a class that is a custom converter.
@@ -10,13 +11,6 @@ export function JsonConverter(target: any) {
     target[Settings.MAPPER_PROPERTY] = "";
 }
 
-interface JsonObjectOptions {
-    classIdentifier?: string;
-    enableAutoSnakeCaseMap?: boolean;
-}
-
-const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'object';
-
 /**
  * Decorator of a class that comes from a JSON object.
  *
@@ -26,7 +20,10 @@ const isJsonObjectOptions = (v: any): v is JsonObjectOptions => typeof v === 'ob
  *
  * @throws Error
  */
-export function JsonObject(target?: string | JsonObjectOptions | any): any {
+interface JsonObjectObjectTypeArg { classIdentifier?: string; enableAutoSnakeCaseMap?: boolean; }
+const isJsonObjectOptions = (v: any): v is JsonObjectObjectTypeArg => typeof v === 'object';
+
+export function JsonObject(target?: string | JsonObjectObjectTypeArg | any): any {
     // target is the constructor or the custom class name
 
     let classIdentifier = "";
@@ -115,87 +112,74 @@ export function JsonObject(target?: string | JsonObjectOptions | any): any {
  * @param isOptional optional param (default: false), if true, the json property does not have to be present in the object
  *
  * @returns {(target:any, classPropertyName:string)=>void}
- *
- * @throws Error
  */
+interface JsonPropertyObjectTypeArg { propName?: string, type?: any, optional?: boolean }
+
+export function JsonProperty(propName?: string, expectedType?: any, isOptional?: boolean): any;
+export function JsonProperty(params?: JsonPropertyObjectTypeArg): any;
 export function JsonProperty(...params: any[]): any {
 
     return function (target: any, classPropertyName: string): void {
         // target is the class
 
-        let jsonPropertyName: string = classPropertyName;
-        let conversionOption: any = Any;
-        let isOptional: boolean = false;
-        let isPropertyNameGiven = true;
+        const propNameProc = (propName?: string) => ({
+            jsonPropertyName: propName ? propName : classPropertyName,
+            isPropertyNameGiven: !!propName,
+        });
 
-        switch (params.length) {
-            case 1:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                jsonPropertyName = params[0];
-                break;
-            case 2:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                if (params[1] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as second parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Use \"Any\" to allow any type. You can import this class from \"json2typescript\".\n\n"
-                );
-                jsonPropertyName = params[0];
-                conversionOption = params[1];
-                break;
-            case 3:
-                if (params[0] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as first parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Leave the decorator parameters empty if you do not wish to pass the first parameter.\n\n"
-                );
-                if (params[1] === undefined) throw new Error(
-                    "Fatal error in JsonConvert. " +
-                    "It's not allowed to explicitly pass \"undefined\" as second parameter in the @JsonProperty decorator.\n\n" +
-                    "\tClass property: \n" +
-                    "\t\t" + classPropertyName + "\n\n" +
-                    "Use \"Any\" to allow any type. You can import this class from \"json2typescript\".\n\n"
-                );
-                jsonPropertyName = params[0];
-                conversionOption = params[1];
-                isOptional = params[2];
-                break;
-            default:
-                isPropertyNameGiven = false;
-                break;
-        }
+        const expectedTypeProc = (expectedType?: any) => {
+            const _expectedType = () => {
+                if (!expectedType) {
+                    const designType = Reflect.getMetadata('design:type', target, classPropertyName);
+                    if (designType.name !== 'Array' && designType.name !== 'Object') {
+                        return designType;
+                    }
+
+                    return Any;
+                }
+                return expectedType;
+            };
+
+            return {
+                expectedType: _expectedType(),
+                isExpectedTypeGiven: !!expectedType,
+            }
+        };
+
+        const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
+            const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
+            if (isObjectTypeArgGiven) {
+                const param = params[0] as JsonPropertyObjectTypeArg;
+
+                return {
+                  ...propNameProc(param.propName),
+                  ...expectedTypeProc(param.type),
+                  ...{ isOptional: !!param.optional }
+                };
+            } else {
+                return {
+                  ...propNameProc(params[0]),
+                  ...expectedTypeProc(params[1]),
+                  ...{ isOptional: !!params[2] }
+                };
+            }
+        })();
 
         if (typeof(target[Settings.MAPPING_PROPERTY]) === "undefined") {
             target[Settings.MAPPING_PROPERTY] = [];
         }
 
-        let jsonPropertyMappingOptions = new MappingOptions();
+        const jsonPropertyMappingOptions = new MappingOptions();
         jsonPropertyMappingOptions.classPropertyName = classPropertyName;
         jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
         jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
         jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
 
-        // Check if conversionOption is a type or a custom converter.
-        if (typeof(conversionOption) !== "undefined" && conversionOption !== null && typeof(conversionOption[Settings.MAPPER_PROPERTY]) !== "undefined") {
-            jsonPropertyMappingOptions.customConverter = new conversionOption();
+        // Check if expectedType is a type or a custom converter.
+        if (typeof(expectedType) !== "undefined" && expectedType !== null && typeof(expectedType[Settings.MAPPER_PROPERTY]) !== "undefined") {
+            jsonPropertyMappingOptions.customConverter = new expectedType();
         } else {
-            jsonPropertyMappingOptions.expectedJsonType = conversionOption;
+            jsonPropertyMappingOptions.expectedJsonType = expectedType;
         }
 
         // Save the mapping info
