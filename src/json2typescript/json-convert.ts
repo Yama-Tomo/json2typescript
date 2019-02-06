@@ -552,7 +552,8 @@ export class JsonConvert {
       );
     }
 
-    if (classInstancePropertyValue === null && this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
+    if (classInstancePropertyValue === null &&
+      (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable)) {
       json[jsonPropertyName] = null;
       return;
     }
@@ -626,7 +627,7 @@ export class JsonConvert {
       );
     }
 
-    if (jsonValue === null && this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
+    if (jsonValue === null && (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable)) {
       instance[classPropertyName] = null;
       return;
     }
