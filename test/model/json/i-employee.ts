@@ -1,6 +1,7 @@
 export interface ISkill {
   id: number;
   skill_name: string;
+  description: string|null;
 }
 
 export interface IEmployee {

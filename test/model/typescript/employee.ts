@@ -6,6 +6,8 @@ export class Skill {
   public id: number = 0;
   @JsonProperty()
   public skillName: string = '';
+  @JsonProperty({ nullable: true })
+  public description: string|null = null;
 }
 
 @JsonObject({ classIdentifier: 'employee', enableAutoSnakeCaseMap: true })
