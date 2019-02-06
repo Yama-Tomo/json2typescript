@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { JsonConvert } from '../src/json2typescript/json-convert';
 import { ValueCheckingMode } from '../src/json2typescript/json-convert-enums';
 import { Cat } from './model/typescript/cat';
@@ -77,6 +78,10 @@ describe('Integration tests', () => {
     const cats = [cat1, cat2];
 
     const employee = (hobby?: string) => {
+      const _instanceSkill = new Emp.Skill();
+      _instanceSkill.id = 100;
+      _instanceSkill.skillName = 'scrum master';
+
       const _instance = new Emp.Employee();
       _instance.id = 1000;
       _instance.firstName = 'Ichiro';
@@ -89,14 +94,17 @@ describe('Integration tests', () => {
       _instance.description.length_of_service = 5;
       _instance.description.position = 'Leader';
       _instance.description.sub_position = '(none)';
+      _instance.skillLists = [_instanceSkill];
 
       return _instance;
     };
 
+
     const employeeJsonObj: IEmployee = {
       id: 1000, first_name: 'Ichiro', last_name: 'Suzuki',
       branch_name: 'developer team', age: 30,
-      description: { length_of_service: 5, position: 'Leader', sub_position: '(none)' }
+      description: { length_of_service: 5, position: 'Leader', sub_position: '(none)' },
+      skill_lists: [{ id: 100, skill_name: 'scrum master' }],
     };
 
     // SERIALIZE INTEGRATION
@@ -155,6 +163,18 @@ describe('Integration tests', () => {
 
       it('should throw error TypeScript property type mismatch in JSON', () => {
         expect(() => jsonConvert.deserializeObject(employeeJsonObj, Emp.InvalidPropertyTypeEmployee)).toThrow();
+      });
+
+      it('should throw error non null property to null', () => {
+        const nonNullConvert = new JsonConvert();
+
+        const invalidFirstNameEmp = cloneDeep(employeeJsonObj) as any;
+        invalidFirstNameEmp.first_name = null;
+        expect(() => nonNullConvert.deserializeObject(invalidFirstNameEmp, Emp.Employee)).toThrow();
+
+        const invalidSkillNameEmp = cloneDeep(employeeJsonObj) as any;
+        invalidSkillNameEmp.skill_lists[0].skill_name = null;
+        expect(() => nonNullConvert.deserializeObject(invalidSkillNameEmp, Emp.Employee)).toThrow();
       });
     });
   });

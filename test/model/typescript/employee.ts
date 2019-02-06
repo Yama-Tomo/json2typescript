@@ -1,5 +1,13 @@
 import { JsonObject, JsonProperty } from '../../../src/json2typescript/json-convert-decorators';
 
+@JsonObject({ classIdentifier: 'skill', enableAutoSnakeCaseMap: true })
+export class Skill {
+  @JsonProperty()
+  public id: number = 0;
+  @JsonProperty()
+  public skillName: string = '';
+}
+
 @JsonObject({ classIdentifier: 'employee', enableAutoSnakeCaseMap: true })
 export class Employee {
   @JsonProperty()
@@ -16,6 +24,8 @@ export class Employee {
   public hobby: string = '(optional)';
   @JsonProperty({ type: [Number, String] })
   public description = { length_of_service: 0, position: '', sub_position: '' };
+  @JsonProperty({ type: [Skill] })
+  public skillLists: Skill[] = [];
 }
 
 @JsonObject({ classIdentifier: 'invalidPropertyMapEmployee', enableAutoSnakeCaseMap: true })
