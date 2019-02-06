@@ -552,6 +552,11 @@ export class JsonConvert {
       );
     }
 
+    if (classInstancePropertyValue === null && this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
+      json[jsonPropertyName] = null;
+      return;
+    }
+
     const expectedJsonType = mappingOptions.expectedJsonType;
     const customConverter = mappingOptions.customConverter;
 
@@ -621,6 +626,11 @@ export class JsonConvert {
       );
     }
 
+    if (jsonValue === null && this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
+      instance[classPropertyName] = null;
+      return;
+    }
+
     const expectedJsonType: any = mappingOptions.expectedJsonType;
     const customConverter: any = mappingOptions.customConverter;
 
@@ -640,7 +650,6 @@ export class JsonConvert {
         `${e.message}\n`,
       );
     }
-
   }
 
   /**
@@ -718,10 +727,6 @@ export class JsonConvert {
       }
 
       if (value === null) {
-        if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-          return null;
-        }
-
         throw new Error('\tReason: Given value is null.');
       }
 
@@ -743,10 +748,6 @@ export class JsonConvert {
         return serialize ? this.serializeObject(value) : this.deserializeObject(value, expectedJsonType);
       }
 
-      if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-        return null;
-      }
-
       throw new Error('\tReason: Given value is null.');
     }
 
@@ -757,10 +758,6 @@ export class JsonConvert {
         return value;
       }
 
-      if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-        return null;
-      }
-
       throw new Error('\tReason: Given value is null.');
     }
 
@@ -768,10 +765,6 @@ export class JsonConvert {
     if (type === 'string' || type === 'number' || type === 'boolean') {
       // Check if we have null value
       if (value === null) {
-        if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
-          return null;
-        }
-
         throw new Error('\tReason: Given value is null.');
       }
 
