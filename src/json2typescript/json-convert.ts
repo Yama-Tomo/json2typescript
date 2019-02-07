@@ -552,8 +552,14 @@ export class JsonConvert {
       );
     }
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+
     if (classInstancePropertyValue === null) {
-      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+      const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
+        mappingOptions.isNullable ||
+        this.getExpectedType(expectedJsonType) === 'any';
+
+      if (isAllowNull) {
         json[jsonPropertyName] = null;
         return;
       }
@@ -561,7 +567,6 @@ export class JsonConvert {
       throw new Error('\tReason: Given value is null.');
     }
 
-    const expectedJsonType = mappingOptions.expectedJsonType;
     const customConverter = mappingOptions.customConverter;
 
     // Map the property
@@ -630,8 +635,15 @@ export class JsonConvert {
       );
     }
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
+
     if (jsonValue === null) {
-      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+      const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
+        mappingOptions.isNullable ||
+        expectedJsonTypeString === 'any';
+
+      if (isAllowNull) {
         instance[classPropertyName] = null;
         return;
       }
@@ -639,8 +651,7 @@ export class JsonConvert {
       throw new Error('\tReason: Given value is null.');
     }
 
-    const expectedJsonType: any = mappingOptions.expectedJsonType;
-    const customConverter: any = mappingOptions.customConverter;
+    const customConverter = mappingOptions.customConverter;
 
     // Map the property
     try {
