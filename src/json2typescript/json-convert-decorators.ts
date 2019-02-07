@@ -168,6 +168,7 @@ export function JsonProperty(...params: any[]): any {
     jsonPropertyMappingOptions.isOptional = isOptional;
     jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
     jsonPropertyMappingOptions.isNullable = isNullable;
+    jsonPropertyMappingOptions.isExpectedTypeGiven = isExpectedTypeGiven;
 
     // Check if expectedType is a type or a custom converter.
     const hasCustomConverter = typeof expectedType !== 'undefined' && expectedType !== null &&

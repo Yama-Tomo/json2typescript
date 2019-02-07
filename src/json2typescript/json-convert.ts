@@ -49,6 +49,8 @@ export class JsonConvert {
    */
   private _propertyMatchingRule = PropertyMatchingRule.CASE_STRICT;
 
+  private _expectedTypeStrict = true;
+
   /**
    * Constructor.
    *
@@ -58,9 +60,10 @@ export class JsonConvert {
    * @param valueCheckingMode optional param (default: ValueCheckingMode.ALLOW_OBJECT_NULL)
    * @param ignorePrimitiveChecks optional param (default: false)
    * @param propertyMatchingRule optional param (default: PropertyMatchingRule.CASE_STRICT)
+   * @param expectedTypeStrict optional param (default: false)
    */
   constructor(operationMode?: number, valueCheckingMode?: number,
-              ignorePrimitiveChecks?: boolean, propertyMatchingRule?: number) {
+              ignorePrimitiveChecks?: boolean, propertyMatchingRule?: number, expectedTypeStrict?: boolean) {
     if (operationMode !== undefined && operationMode in OperationMode) {
       this.operationMode = operationMode;
     }
@@ -75,6 +78,10 @@ export class JsonConvert {
 
     if (propertyMatchingRule !== undefined) {
       this.propertyMatchingRule = propertyMatchingRule;
+    }
+
+    if (expectedTypeStrict !== undefined) {
+      this.expectedTypeStrict = expectedTypeStrict;
     }
   }
 
@@ -180,6 +187,14 @@ export class JsonConvert {
     if (value in PropertyMatchingRule) {
       this._propertyMatchingRule = value;
     }
+  }
+
+  get expectedTypeStrict(): boolean {
+    return this._expectedTypeStrict;
+  }
+
+  set expectedTypeStrict(value: boolean) {
+    this._expectedTypeStrict = value;
   }
 
   /**
