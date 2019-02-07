@@ -5,7 +5,9 @@ import { MappingOptions, Settings } from './json-convert-options';
 import { Any } from './any';
 import * as lodash from 'lodash';
 
-type ObjectType = { [key: string]: any }
+interface ObjectType {
+  [key: string]: any;
+}
 
 /**
  * Offers a simple API for mapping JSON objects to TypeScript/JavaScript classes and vice versa.
@@ -49,6 +51,8 @@ export class JsonConvert {
    */
   private _propertyMatchingRule = PropertyMatchingRule.CASE_STRICT;
 
+  private _expectedTypeStrict = true;
+
   /**
    * Constructor.
    *
@@ -58,9 +62,10 @@ export class JsonConvert {
    * @param valueCheckingMode optional param (default: ValueCheckingMode.ALLOW_OBJECT_NULL)
    * @param ignorePrimitiveChecks optional param (default: false)
    * @param propertyMatchingRule optional param (default: PropertyMatchingRule.CASE_STRICT)
+   * @param expectedTypeStrict optional param (default: false)
    */
   constructor(operationMode?: number, valueCheckingMode?: number,
-              ignorePrimitiveChecks?: boolean, propertyMatchingRule?: number) {
+              ignorePrimitiveChecks?: boolean, propertyMatchingRule?: number, expectedTypeStrict?: boolean) {
     if (operationMode !== undefined && operationMode in OperationMode) {
       this.operationMode = operationMode;
     }
@@ -75,6 +80,10 @@ export class JsonConvert {
 
     if (propertyMatchingRule !== undefined) {
       this.propertyMatchingRule = propertyMatchingRule;
+    }
+
+    if (expectedTypeStrict !== undefined) {
+      this.expectedTypeStrict = expectedTypeStrict;
     }
   }
 
@@ -180,6 +189,14 @@ export class JsonConvert {
     if (value in PropertyMatchingRule) {
       this._propertyMatchingRule = value;
     }
+  }
+
+  get expectedTypeStrict(): boolean {
+    return this._expectedTypeStrict;
+  }
+
+  set expectedTypeStrict(value: boolean) {
+    this._expectedTypeStrict = value;
   }
 
   /**
@@ -566,7 +583,7 @@ export class JsonConvert {
         return;
       }
 
-      throw new Error('\tReason: Given value is null.');
+      throw new Error(`\tReason: [${jsonPropertyName}] Given value is null.`);
     }
 
     const customConverter = mappingOptions.customConverter;
@@ -623,6 +640,12 @@ export class JsonConvert {
       }
     })();
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
+    if (this.expectedTypeStrict && !mappingOptions.isExpectedTypeGiven) {
+      console.warn(`Warn: expected type is any. ${instance.constructor.name}: ${classPropertyName}`);
+    }
+
     // Check if the json value exists
     if (typeof jsonValue === 'undefined') {
       if (isOptional) {
@@ -637,9 +660,6 @@ export class JsonConvert {
       );
     }
 
-    const expectedJsonType = mappingOptions.expectedJsonType;
-    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
-
     if (jsonValue === null) {
       const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
         mappingOptions.isNullable ||
@@ -650,7 +670,7 @@ export class JsonConvert {
         return;
       }
 
-      throw new Error('\tReason: Given value is null.');
+      throw new Error(`\tReason: [${classPropertyName}] Given value is null.`);
     }
 
     const customConverter = mappingOptions.customConverter;

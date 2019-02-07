@@ -10,9 +10,9 @@ import { IDog } from './model/json/i-dog';
 import { IEmployee } from './model/json/i-employee';
 import * as Emp from './model/typescript/employee';
 
-describe('Integration tests', () => {
-  const jsonConvert = new JsonConvert();
+beforeEach(() => spyOn(console, 'warn'));
 
+describe('Integration tests', () => {
   describe('JsonConvert', () => {
     // JSON DATA
     const human1JsonObject: IHuman = {
@@ -109,6 +109,7 @@ describe('Integration tests', () => {
 
     // SERIALIZE INTEGRATION
     describe('serialize', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('should serialize a TypeScript object to a JSON object', () => {
@@ -146,6 +147,7 @@ describe('Integration tests', () => {
 
     // DESERIALIZE INTEGRATION
     describe('deserialize', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('should deserialize a JSON object to a TypeScript object', () => {

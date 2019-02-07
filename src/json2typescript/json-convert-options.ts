@@ -20,4 +20,5 @@ export class MappingOptions {
   public customConverter: any = null;
   public isPropertyNameGiven = false;
   public isNullable = false;
+  public isExpectedTypeGiven = false;
 }

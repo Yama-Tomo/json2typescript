@@ -24,7 +24,7 @@
     "test": "karma start karma.conf.js",
     "build": "npm run test && tsc",
     "dist": "npm run build && npm pack",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p tsconfig.json --format codeFrame",
     "prepare": "tsc"
   },
   "typescript": {

@@ -532,6 +532,16 @@ If true, it will be allowed to assign primitive to other primitive types.
 
 The default is `false`.
 
+### expected type strict mode
+
+`(bool) JsonConvert.expectedTypeStrict`
+
+If true, output warning when not given expectedType to `@JsonProperty`.
+This is used for development.
+
+The default is `false`.
+
+
 ### Public methods
 
 `json2typescript` allows you to map JSON objects (or arrays) to TypeScript objects (or arrays) and vice versa.
