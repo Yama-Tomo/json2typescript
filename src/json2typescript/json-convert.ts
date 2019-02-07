@@ -583,7 +583,7 @@ export class JsonConvert {
         return;
       }
 
-      throw new Error('\tReason: Given value is null.');
+      throw new Error(`\tReason: [${jsonPropertyName}] Given value is null.`);
     }
 
     const customConverter = mappingOptions.customConverter;
@@ -670,7 +670,7 @@ export class JsonConvert {
         return;
       }
 
-      throw new Error('\tReason: Given value is null.');
+      throw new Error(`\tReason: [${classPropertyName}] Given value is null.`);
     }
 
     const customConverter = mappingOptions.customConverter;
