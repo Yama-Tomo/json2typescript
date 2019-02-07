@@ -5,7 +5,9 @@ import { MappingOptions, Settings } from './json-convert-options';
 import { Any } from './any';
 import * as lodash from 'lodash';
 
-type ObjectType = { [key: string]: any }
+interface ObjectType {
+  [key: string]: any;
+}
 
 /**
  * Offers a simple API for mapping JSON objects to TypeScript/JavaScript classes and vice versa.
