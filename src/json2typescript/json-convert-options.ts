@@ -15,7 +15,7 @@ export class Settings {
 export class MappingOptions {
   public classPropertyName: string = '';
   public jsonPropertyName: string[] = [];
-  public expectedJsonType?: string = undefined;
+  public expectedJsonType?: any = undefined;
   public isOptional: boolean = false;
   public customConverter: any = null;
   public isPropertyNameGiven = false;
