@@ -5,6 +5,8 @@ import { MappingOptions, Settings } from './json-convert-options';
 import { Any } from './any';
 import * as lodash from 'lodash';
 
+type ObjectType = { [key: string]: any }
+
 /**
  * Offers a simple API for mapping JSON objects to TypeScript/JavaScript classes and vice versa.
  *
@@ -20,7 +22,7 @@ export class JsonConvert {
    * - OperationMode.ENABLE: json2typescript is enabled, but only errors are logged
    * - OperationMode.LOGGING: json2typescript is enabled and detailed information is logged
    */
-  private _operationMode: number = OperationMode.ENABLE;
+  private _operationMode = OperationMode.ENABLE;
 
   /**
    * Determines which types are allowed to be null.
@@ -30,13 +32,13 @@ export class JsonConvert {
    * - ValueCheckingMode.ALLOW_OBJECT_NULL: objects in the JSON are allowed to be null, primitive types are not allowed to be null
    * - ValueCheckingMode.DISALLOW_NULL: no null values are tolerated in the JSON
    */
-  private _valueCheckingMode: number = ValueCheckingMode.ALLOW_OBJECT_NULL;
+  private _valueCheckingMode = ValueCheckingMode.ALLOW_OBJECT_NULL;
 
   /**
    * Determines whether primitive types should be checked.
    * If true, it will be allowed to assign primitive to other primitive types.
    */
-  private _ignorePrimitiveChecks: boolean = false;
+  private _ignorePrimitiveChecks = false;
 
   /**
    * Determines the rule of how JSON properties shall be matched with class properties during deserialization.
@@ -45,7 +47,7 @@ export class JsonConvert {
    * - CASE_STRICT: JSON properties need to match exactly the names in the decorators
    * - CASE_INSENSITIVE: JSON properties need to match names in the decorators, but names they are not case sensitive
    */
-  private _propertyMatchingRule: number = PropertyMatchingRule.CASE_STRICT;
+  private _propertyMatchingRule = PropertyMatchingRule.CASE_STRICT;
 
   /**
    * Constructor.
@@ -552,8 +554,14 @@ export class JsonConvert {
       );
     }
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+
     if (classInstancePropertyValue === null) {
-      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+      const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
+        mappingOptions.isNullable ||
+        this.getExpectedType(expectedJsonType) === 'any';
+
+      if (isAllowNull) {
         json[jsonPropertyName] = null;
         return;
       }
@@ -561,7 +569,6 @@ export class JsonConvert {
       throw new Error('\tReason: Given value is null.');
     }
 
-    const expectedJsonType = mappingOptions.expectedJsonType;
     const customConverter = mappingOptions.customConverter;
 
     // Map the property
@@ -630,8 +637,15 @@ export class JsonConvert {
       );
     }
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
+
     if (jsonValue === null) {
-      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+      const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
+        mappingOptions.isNullable ||
+        expectedJsonTypeString === 'any';
+
+      if (isAllowNull) {
         instance[classPropertyName] = null;
         return;
       }
@@ -639,8 +653,7 @@ export class JsonConvert {
       throw new Error('\tReason: Given value is null.');
     }
 
-    const expectedJsonType: any = mappingOptions.expectedJsonType;
-    const customConverter: any = mappingOptions.customConverter;
+    const customConverter = mappingOptions.customConverter;
 
     // Map the property
     try {
@@ -706,7 +719,7 @@ export class JsonConvert {
    *
    * @throws an error in case of failure
    */
-  private verifyProperty(expectedJsonType: any, value: any, serialize?: boolean): any {
+  private verifyProperty(expectedJsonType: any, value: unknown, serialize?: boolean): any {
     const type = this.getExpectedType(expectedJsonType).toLowerCase();
 
     // Map immediately if we don't care about the type
@@ -741,7 +754,7 @@ export class JsonConvert {
     throw new Error('\tReason: Mapping failed because of an unknown error.');
   }
 
-  private verifyPropertyElement(expectedJsonType: any, type: string, value: any, serialize?: boolean) {
+  private verifyPropertyElement(expectedJsonType: any, type: string, value: unknown, serialize?: boolean) {
     // Check the type
     // only decorated custom objects have this injected property
     if (typeof expectedJsonType !== 'undefined' &&
@@ -778,7 +791,7 @@ export class JsonConvert {
     );
   }
 
-  private verifyPropertyArray(expectedJsonType: any[], value: any, serialize?: boolean) {
+  private verifyPropertyArray(expectedJsonType: any[], value: Array<unknown>, serialize?: boolean) {
     const array: any[] = [];
 
     // No data given, so return empty value
@@ -804,7 +817,7 @@ export class JsonConvert {
     return array;
   }
 
-  private verifyPropertyObject(expectedJsonType: any[], value: any, serialize?: boolean) {
+  private verifyPropertyObject(expectedJsonType: any[], value: ObjectType, serialize?: boolean) {
     const object: any = {};
     const propLength = Object.keys(value).length;
 
@@ -819,7 +832,7 @@ export class JsonConvert {
     }
 
     // Loop through the data. Both type and value are at least of length 1
-    const autofillType: boolean = expectedJsonType.length < propLength;
+    const autofillType = expectedJsonType.length < propLength;
     let i = 0;
     for (const key of Object.keys(value)) {
       if (autofillType && i >= expectedJsonType.length) {
@@ -844,7 +857,7 @@ export class JsonConvert {
    *
    * @throws an Error in case of the key was not found in the object
    */
-  private getObjectValue(data: any, key: string): any {
+  private getObjectValue(data: ObjectType, key: string): any {
     // If we do not care about the case of the key, ad
     if (this.propertyMatchingRule === PropertyMatchingRule.CASE_INSENSITIVE) {
 
@@ -918,7 +931,7 @@ export class JsonConvert {
    *
    * @returns {string} the string representation
    */
-  private getJsonType(jsonValue: any): string {
+  private getJsonType(jsonValue: ObjectType): string {
     if (jsonValue === null) {
       return 'null';
     }
