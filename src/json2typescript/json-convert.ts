@@ -638,6 +638,12 @@ export class JsonConvert {
       }
     })();
 
+    const expectedJsonType = mappingOptions.expectedJsonType;
+    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
+    if (this.expectedTypeStrict && !mappingOptions.isExpectedTypeGiven) {
+      console.warn(`Warn: expected type is any. ${instance.constructor.name}: ${classPropertyName}`);
+    }
+
     // Check if the json value exists
     if (typeof jsonValue === 'undefined') {
       if (isOptional) {
@@ -651,9 +657,6 @@ export class JsonConvert {
         `\tJSON property: \n\t\t${jsonPropertyName}\n\n`,
       );
     }
-
-    const expectedJsonType = mappingOptions.expectedJsonType;
-    const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
 
     if (jsonValue === null) {
       const isAllowNull = this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL ||
