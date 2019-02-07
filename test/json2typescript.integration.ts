@@ -10,6 +10,8 @@ import { IDog } from './model/json/i-dog';
 import { IEmployee } from './model/json/i-employee';
 import * as Emp from './model/typescript/employee';
 
+beforeEach(() => spyOn(console, 'warn'));
+
 describe('Integration tests', () => {
   describe('JsonConvert', () => {
     // JSON DATA
