@@ -5,6 +5,8 @@ import { MappingOptions, Settings } from './json-convert-options';
 import { Any } from './any';
 import * as lodash from 'lodash';
 
+type ObjectType = { [key: string]: any }
+
 /**
  * Offers a simple API for mapping JSON objects to TypeScript/JavaScript classes and vice versa.
  *
@@ -717,7 +719,7 @@ export class JsonConvert {
    *
    * @throws an error in case of failure
    */
-  private verifyProperty(expectedJsonType: any, value: any, serialize?: boolean): any {
+  private verifyProperty(expectedJsonType: any, value: unknown, serialize?: boolean): any {
     const type = this.getExpectedType(expectedJsonType).toLowerCase();
 
     // Map immediately if we don't care about the type
@@ -752,7 +754,7 @@ export class JsonConvert {
     throw new Error('\tReason: Mapping failed because of an unknown error.');
   }
 
-  private verifyPropertyElement(expectedJsonType: any, type: string, value: any, serialize?: boolean) {
+  private verifyPropertyElement(expectedJsonType: any, type: string, value: unknown, serialize?: boolean) {
     // Check the type
     // only decorated custom objects have this injected property
     if (typeof expectedJsonType !== 'undefined' &&
@@ -789,7 +791,7 @@ export class JsonConvert {
     );
   }
 
-  private verifyPropertyArray(expectedJsonType: any[], value: any, serialize?: boolean) {
+  private verifyPropertyArray(expectedJsonType: any[], value: Array<unknown>, serialize?: boolean) {
     const array: any[] = [];
 
     // No data given, so return empty value
@@ -815,7 +817,7 @@ export class JsonConvert {
     return array;
   }
 
-  private verifyPropertyObject(expectedJsonType: any[], value: any, serialize?: boolean) {
+  private verifyPropertyObject(expectedJsonType: any[], value: ObjectType, serialize?: boolean) {
     const object: any = {};
     const propLength = Object.keys(value).length;
 
@@ -855,7 +857,7 @@ export class JsonConvert {
    *
    * @throws an Error in case of the key was not found in the object
    */
-  private getObjectValue(data: any, key: string): any {
+  private getObjectValue(data: ObjectType, key: string): any {
     // If we do not care about the case of the key, ad
     if (this.propertyMatchingRule === PropertyMatchingRule.CASE_INSENSITIVE) {
 
@@ -929,7 +931,7 @@ export class JsonConvert {
    *
    * @returns {string} the string representation
    */
-  private getJsonType(jsonValue: any): string {
+  private getJsonType(jsonValue: ObjectType): string {
     if (jsonValue === null) {
       return 'null';
     }
