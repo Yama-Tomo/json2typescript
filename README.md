@@ -270,7 +270,7 @@ mapping between snake-case and camel-case is automatically if enableAutoSnakeCas
 ```
 
 ```typescript
-@JsonObject({ classIdentifier: 'User',  enableAutoSnakeCaseMap: true })
+@JsonObject({ classIdentifier: 'User', enableAutoSnakeCaseMap: true })
 export class User {
   // mapped `first_name` of json
   @JsonProperty()
@@ -291,6 +291,8 @@ Property decorators are a vital part for type checking. It is important that the
 export class User {
     @JsonProperty("jsonPropertyName", String, false)
     name: string = undefined;
+    @JsonProperty("foo_bar", String, false, true)
+    fooBar: string|null = null;
 }
 ```
 
@@ -301,6 +303,8 @@ or
 export class User {
     @JsonProperty({ propName: "jsonPropertyName", type: String, optional: true })
     name: string = undefined;
+    @JsonProperty({ propName: "foo_bar", type: String, optional: false, nullable: true })
+    fooBar: string|null = null;
 }
 ```
 you can give an object type.
@@ -311,7 +315,7 @@ initialization, otherwise our mapper does **not** work.
 > Tip: Make sure you import `JsonObject` and `JsonProperty` from `json2typescript`.
 
 #### First parameter: jsonProperty
-###### name: propName (optional) `if object type given`
+- key name: propName (if arg type is object)
 
 The first parameter of `@JsonProperty` is the JSON object property name. 
 It happens that the property names given by the server are very ugly.
@@ -319,7 +323,7 @@ Here you can map any json property name to the `User` property `name`.
 In our case, `json["jsonPropertyName"]` gets mapped to `user.name`.
 
 #### Second parameter (optional): conversionOption
-###### name: type (optional) `if object type given`
+- key name: type (if arg type is object)
 
 The second parameter of `@JsonProperty` describes what happens when doing the mapping between JSON and TypeScript objects.
 This parameter is optional; the default value is `Any` (which means no type check is done when the mapping happens).
@@ -391,7 +395,7 @@ export class User {
 ```
 
 #### Third parameter (optional): isOptional
-###### name: optional (optional) `if object type given`
+- key name: optional (if arg type is object)
 
 The third parameter of `@JsonProperty` determines whether the `jsonProperty` has to be present in the json.
 This parameter is optional; the default value is false.
@@ -408,6 +412,25 @@ The same applies for the case when you try to serialize a TypeScript object to a
 * By default, casting primitives into other primitives is not allowed. Check the public properties below in this document to change this behaviour.
 * By default, primitives are not allowed to be null. Check the public properties below in this document to change this.
 * If you don't know the type, you may use `Any` as expected type. You may also omit the second parameter of `@JsonProperty`.
+
+#### 4th parameter (optional): isNullable
+- key name: nullable (if arg type is object)
+
+The 4th parameter of `@JsonProperty` describes that property is possibility null.
+This parameter is optional; the default value is `false`.
+If you given an option to `true`, if the JSON value is null, it is mapped as null.
+
+(this option will take precedence than `ValueCheckingMode.DISALLOW_NULL` option when it `true`)
+
+
+##### use case
+
+use when there is a variable declared with a possibly null union type.
+
+```typescript
+@JsonProperty("foo_bar", String, false, true)
+fooBar: string|null = null;
+```
 
 #### More about the array syntax
 
