@@ -9,7 +9,6 @@ import { IHuman } from './model/json/i-human';
 import { ICat } from './model/json/i-cat';
 
 describe('Unit tests', () => {
-  const jsonConvert = new JsonConvert();
 
   describe('JsonConvert', () => {
     // JSON DATA
@@ -78,7 +77,7 @@ describe('Unit tests', () => {
     // SETUP CHECKS
     describe('setup checks', () => {
       it('JsonConvert instance', () => {
-        let jsonConvertTest: JsonConvert;
+        let jsonConvertTest = new JsonConvert();
 
         jsonConvertTest = new JsonConvert(OperationMode.ENABLE, ValueCheckingMode.ALLOW_OBJECT_NULL, false);
         expect(jsonConvertTest.operationMode).toEqual(OperationMode.ENABLE);
@@ -110,6 +109,7 @@ describe('Unit tests', () => {
 
     // NULL/UNDEFINED CHECKS
     describe('null/undefined checks', () => {
+      const jsonConvert = new JsonConvert();
       it('serialize and deserialize null', () => {
         jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
@@ -134,6 +134,7 @@ describe('Unit tests', () => {
 
     // BASIC CHECKS
     describe('basic checks', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('serialize and deserialize same data', () => {
@@ -155,6 +156,7 @@ describe('Unit tests', () => {
 
     // PRIVATE METHODS
     describe('private methods', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('serializeObject_loopProperty()', () => {
@@ -199,6 +201,7 @@ describe('Unit tests', () => {
 
     // HELPER METHODS
     describe('helper methods', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('getClassPropertyMappingOptions()', () => {
@@ -227,6 +230,7 @@ describe('Unit tests', () => {
 
     // JSON2TYPESCRIPT TYPES
     describe('json2typescript types', () => {
+      const jsonConvert = new JsonConvert();
       jsonConvert.valueCheckingMode = ValueCheckingMode.ALLOW_NULL;
 
       it('getExpectedType()', () => {
