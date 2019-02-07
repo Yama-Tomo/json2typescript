@@ -1,3 +1,15 @@
+# v2.0.2 (2019-02-07)
+
+## Features
+
+* output warning when expectedType not given [#14](https://github.com/Yama-Tomo/json2typescript/pull/14)
+* add nullable option to `JsonProperty` [#12](https://github.com/Yama-Tomo/json2typescript/pull/12), [#13](https://github.com/Yama-Tomo/json2typescript/pull/13)
+
+## Refactoring
+
+* introduced tslint and code style changes ([so big change](https://github.com/Yama-Tomo/json2typescript/pull/8))
+* update packages [here](https://github.com/Yama-Tomo/json2typescript/pull/7)
+
 # v2.0.1 (2019-02-05)
 
 ## Features
