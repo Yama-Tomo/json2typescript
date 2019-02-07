@@ -22,7 +22,7 @@ export class JsonConvert {
    * - OperationMode.ENABLE: json2typescript is enabled, but only errors are logged
    * - OperationMode.LOGGING: json2typescript is enabled and detailed information is logged
    */
-  private _operationMode: number = OperationMode.ENABLE;
+  private _operationMode = OperationMode.ENABLE;
 
   /**
    * Determines which types are allowed to be null.
@@ -32,13 +32,13 @@ export class JsonConvert {
    * - ValueCheckingMode.ALLOW_OBJECT_NULL: objects in the JSON are allowed to be null, primitive types are not allowed to be null
    * - ValueCheckingMode.DISALLOW_NULL: no null values are tolerated in the JSON
    */
-  private _valueCheckingMode: number = ValueCheckingMode.ALLOW_OBJECT_NULL;
+  private _valueCheckingMode = ValueCheckingMode.ALLOW_OBJECT_NULL;
 
   /**
    * Determines whether primitive types should be checked.
    * If true, it will be allowed to assign primitive to other primitive types.
    */
-  private _ignorePrimitiveChecks: boolean = false;
+  private _ignorePrimitiveChecks = false;
 
   /**
    * Determines the rule of how JSON properties shall be matched with class properties during deserialization.
@@ -47,7 +47,7 @@ export class JsonConvert {
    * - CASE_STRICT: JSON properties need to match exactly the names in the decorators
    * - CASE_INSENSITIVE: JSON properties need to match names in the decorators, but names they are not case sensitive
    */
-  private _propertyMatchingRule: number = PropertyMatchingRule.CASE_STRICT;
+  private _propertyMatchingRule = PropertyMatchingRule.CASE_STRICT;
 
   /**
    * Constructor.
@@ -832,7 +832,7 @@ export class JsonConvert {
     }
 
     // Loop through the data. Both type and value are at least of length 1
-    const autofillType: boolean = expectedJsonType.length < propLength;
+    const autofillType = expectedJsonType.length < propLength;
     let i = 0;
     for (const key of Object.keys(value)) {
       if (autofillType && i >= expectedJsonType.length) {
