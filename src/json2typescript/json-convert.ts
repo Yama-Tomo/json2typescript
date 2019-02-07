@@ -552,6 +552,15 @@ export class JsonConvert {
       );
     }
 
+    if (classInstancePropertyValue === null) {
+      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+        json[jsonPropertyName] = null;
+        return;
+      }
+
+      throw new Error('\tReason: Given value is null.');
+    }
+
     const expectedJsonType = mappingOptions.expectedJsonType;
     const customConverter = mappingOptions.customConverter;
 
@@ -621,6 +630,15 @@ export class JsonConvert {
       );
     }
 
+    if (jsonValue === null) {
+      if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL || mappingOptions.isNullable) {
+        instance[classPropertyName] = null;
+        return;
+      }
+
+      throw new Error('\tReason: Given value is null.');
+    }
+
     const expectedJsonType: any = mappingOptions.expectedJsonType;
     const customConverter: any = mappingOptions.customConverter;
 
@@ -640,7 +658,6 @@ export class JsonConvert {
         `${e.message}\n`,
       );
     }
-
   }
 
   /**
@@ -717,14 +734,6 @@ export class JsonConvert {
         return this.verifyPropertyObject(expectedJsonType, value, serialize);
       }
 
-      if (value === null) {
-        if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-          return null;
-        }
-
-        throw new Error('\tReason: Given value is null.');
-      }
-
       throw new Error('\tReason: Expected type is array, but given value is non-array.');
     }
 
@@ -738,43 +747,16 @@ export class JsonConvert {
     if (typeof expectedJsonType !== 'undefined' &&
       expectedJsonType.prototype.hasOwnProperty(Settings.CLASS_IDENTIFIER)) {
 
-      // Check if we have null value
-      if (value !== null) {
-        return serialize ? this.serializeObject(value) : this.deserializeObject(value, expectedJsonType);
-      }
-
-      if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-        return null;
-      }
-
-      throw new Error('\tReason: Given value is null.');
+      return serialize ? this.serializeObject(value) : this.deserializeObject(value, expectedJsonType);
     }
 
     // general object
     if (type === 'any') {
-      // Check if we have null value
-      if (value !== null) {
-        return value;
-      }
-
-      if (this.valueCheckingMode !== ValueCheckingMode.DISALLOW_NULL) {
-        return null;
-      }
-
-      throw new Error('\tReason: Given value is null.');
+      return value;
     }
 
     // otherwise check for a primitive type
     if (type === 'string' || type === 'number' || type === 'boolean') {
-      // Check if we have null value
-      if (value === null) {
-        if (this.valueCheckingMode === ValueCheckingMode.ALLOW_NULL) {
-          return null;
-        }
-
-        throw new Error('\tReason: Given value is null.');
-      }
-
       // Check if the types match
       if ( // primitive types match
         this.ignorePrimitiveChecks ||

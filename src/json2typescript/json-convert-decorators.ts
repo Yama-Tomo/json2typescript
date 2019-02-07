@@ -105,9 +105,10 @@ interface JsonPropertyObjectTypeArg {
   propName?: string;
   type?: any;
   optional?: boolean;
+  nullable?: boolean;
 }
 
-export function JsonProperty(propName?: string, expectedType?: any, isOptional?: boolean): any;
+export function JsonProperty(propName?: string, expectedType?: any, isOptional?: boolean, isNullable?: boolean): any;
 export function JsonProperty(params?: JsonPropertyObjectTypeArg): any;
 export function JsonProperty(...params: any[]): any {
   return (target: any, classPropertyName: string): void => {
@@ -136,7 +137,9 @@ export function JsonProperty(...params: any[]): any {
       };
     };
 
-    const { jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven } = (() => {
+    const {
+      jsonPropertyName, expectedType, isOptional, isPropertyNameGiven, isExpectedTypeGiven, isNullable,
+    } = (() => {
       const isObjectTypeArgGiven = params.length === 1 && typeof params[0] !== 'string';
       if (isObjectTypeArgGiven) {
         const param = params[0] as JsonPropertyObjectTypeArg;
@@ -144,13 +147,13 @@ export function JsonProperty(...params: any[]): any {
         return {
           ...getPropName(param.propName),
           ...getExpectedType(param.type),
-          ...{ isOptional: !!param.optional },
+          ...{ isOptional: !!param.optional, isNullable: !!param.nullable },
         };
       } else {
         return {
           ...getPropName(params[0]),
           ...getExpectedType(params[1]),
-          ...{ isOptional: !!params[2] },
+          ...{ isOptional: !!params[2], isNullable: !!params[3] },
         };
       }
     })();
@@ -162,8 +165,9 @@ export function JsonProperty(...params: any[]): any {
     const jsonPropertyMappingOptions = new MappingOptions();
     jsonPropertyMappingOptions.classPropertyName = classPropertyName;
     jsonPropertyMappingOptions.jsonPropertyName.push(jsonPropertyName);
-    jsonPropertyMappingOptions.isOptional = isOptional ? isOptional : false;
+    jsonPropertyMappingOptions.isOptional = isOptional;
     jsonPropertyMappingOptions.isPropertyNameGiven = isPropertyNameGiven;
+    jsonPropertyMappingOptions.isNullable = isNullable;
 
     // Check if expectedType is a type or a custom converter.
     const hasCustomConverter = typeof expectedType !== 'undefined' && expectedType !== null &&

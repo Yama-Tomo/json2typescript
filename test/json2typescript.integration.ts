@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { JsonConvert } from '../src/json2typescript/json-convert';
 import { ValueCheckingMode } from '../src/json2typescript/json-convert-enums';
 import { Cat } from './model/typescript/cat';
@@ -77,6 +78,11 @@ describe('Integration tests', () => {
     const cats = [cat1, cat2];
 
     const employee = (hobby?: string) => {
+      const _instanceSkill = new Emp.Skill();
+      _instanceSkill.id = 100;
+      _instanceSkill.skillName = 'scrum master';
+      _instanceSkill.description = 'hogehoge';
+
       const _instance = new Emp.Employee();
       _instance.id = 1000;
       _instance.firstName = 'Ichiro';
@@ -89,6 +95,7 @@ describe('Integration tests', () => {
       _instance.description.length_of_service = 5;
       _instance.description.position = 'Leader';
       _instance.description.sub_position = '(none)';
+      _instance.skillLists = [_instanceSkill];
 
       return _instance;
     };
@@ -96,7 +103,8 @@ describe('Integration tests', () => {
     const employeeJsonObj: IEmployee = {
       id: 1000, first_name: 'Ichiro', last_name: 'Suzuki',
       branch_name: 'developer team', age: 30,
-      description: { length_of_service: 5, position: 'Leader', sub_position: '(none)' }
+      description: { length_of_service: 5, position: 'Leader', sub_position: '(none)' },
+      skill_lists: [{ id: 100, skill_name: 'scrum master', description: 'hogehoge' }],
     };
 
     // SERIALIZE INTEGRATION
@@ -123,6 +131,17 @@ describe('Integration tests', () => {
 
         expect(() => jsonConvert.serializeArray(cat1 as any)).toThrow();
       });
+
+      it('should serialize a TypeScript object to a JSON object (non null)', () => {
+        const nonNullConvert = new JsonConvert();
+
+        const employeeObj = employee('soccer');
+        employeeObj.skillLists[0].description = null;
+        const expected = cloneDeep(employeeJsonObj);
+        expected.skill_lists[0].description = null;
+
+        expect(nonNullConvert.serializeObject(employeeObj)).toEqual({ ...expected, ...{ hobby: 'soccer' } });
+      });
     });
 
     // DESERIALIZE INTEGRATION
@@ -141,6 +160,16 @@ describe('Integration tests', () => {
         expect(() => jsonConvert.deserializeArray(cat1JsonObject as any, Cat)).toThrow();
       });
 
+      it('should deserialize a JSON object to a TypeScript object (non null)', () => {
+        const nonNullConvert = new JsonConvert();
+
+        const descNullEmp = cloneDeep(employeeJsonObj);
+        descNullEmp.skill_lists[0].description = null;
+        const expected = employee();
+        expected.skillLists[0].description = null;
+        expect(nonNullConvert.deserializeObject(employeeJsonObj, Emp.Employee)).toEqual(employee());
+      });
+
       it('should deserialize a JSON array to a TypeScript array', () => {
         expect(jsonConvert.deserialize(catsJsonArray, Cat)).toEqual(cats);
         expect(jsonConvert.deserializeArray(catsJsonArray, Cat)).toEqual(cats);
@@ -155,6 +184,18 @@ describe('Integration tests', () => {
 
       it('should throw error TypeScript property type mismatch in JSON', () => {
         expect(() => jsonConvert.deserializeObject(employeeJsonObj, Emp.InvalidPropertyTypeEmployee)).toThrow();
+      });
+
+      it('should throw error non null property to null', () => {
+        const nonNullConvert = new JsonConvert();
+
+        const invalidFirstNameEmp = cloneDeep(employeeJsonObj) as any;
+        invalidFirstNameEmp.first_name = null;
+        expect(() => nonNullConvert.deserializeObject(invalidFirstNameEmp, Emp.Employee)).toThrow();
+
+        const invalidSkillNameEmp = cloneDeep(employeeJsonObj) as any;
+        invalidSkillNameEmp.skill_lists[0].skill_name = null;
+        expect(() => nonNullConvert.deserializeObject(invalidSkillNameEmp, Emp.Employee)).toThrow();
       });
     });
   });
