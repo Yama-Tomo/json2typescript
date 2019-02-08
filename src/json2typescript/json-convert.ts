@@ -51,7 +51,7 @@ export class JsonConvert {
    */
   private _propertyMatchingRule = PropertyMatchingRule.CASE_STRICT;
 
-  private _expectedTypeStrict = true;
+  private _expectedTypeStrict = false;
 
   /**
    * Constructor.
