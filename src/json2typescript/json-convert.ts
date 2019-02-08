@@ -642,7 +642,7 @@ export class JsonConvert {
 
     const expectedJsonType = mappingOptions.expectedJsonType;
     const expectedJsonTypeString = this.getExpectedType(expectedJsonType);
-    if (this.expectedTypeStrict && !mappingOptions.isExpectedTypeGiven) {
+    if (this.expectedTypeStrict && expectedJsonTypeString === 'any' && !mappingOptions.isExpectedTypeGiven) {
       console.warn(`Warn: expected type is any. ${instance.constructor.name}: ${classPropertyName}`);
     }
 
