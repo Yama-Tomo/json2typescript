@@ -1,3 +1,9 @@
+# v2.0.3 (2019-02-08)
+
+## Bug Fixes
+
+* expectedTypeStrict is default enabled [here](https://github.com/Yama-Tomo/json2typescript/commit/8787c35ea3660c7721655a748332648a38c5b81f)
+
 # v2.0.2 (2019-02-07)
 
 ## Features
