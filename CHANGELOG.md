@@ -1,3 +1,9 @@
+# v2.0.4 (2019-02-08)
+
+## Bug Fixes
+
+* fix condition of output warning when expectedType not given [here](https://github.com/Yama-Tomo/json2typescript/commit/b16c8c2b24d4853f830d2f794e6142473cefbe37)
+
 # v2.0.3 (2019-02-08)
 
 ## Bug Fixes
