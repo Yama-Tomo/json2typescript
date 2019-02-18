@@ -1,3 +1,8 @@
+# v1.1.0 (2019-02-18)
+
+* track original repo changes (v1.1.1)
+
+
 # v1.0.9 (2019-02-03)
 
 * track original repo changes (v1.1.0)
