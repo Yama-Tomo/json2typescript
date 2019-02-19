@@ -1,6 +1,6 @@
 # json2typescript
 
-In Angular 2 applications, everyone consumes JSON API's from an external source. 
+In Angular applications, everyone consumes JSON API's from an external source. 
 Type checking and object mapping is only possible in TypeScript, but not in the JavaScript runtime.
 As the API may change at any point, it is important for larger projects to verify the consumed data.
 
@@ -21,7 +21,8 @@ let user: User = jsonConvert.deserializeObject(jsonObj, User);
 console.log(user); // prints User{ ... } in JavaScript runtime, not Object{ ... }
 ```
 
-> Tip: All `serialize()` and `deserialize()` methods may throw an exception in case of failure. Make sure you catch the errors in production!
+> Tip: All `serialize()` and `deserialize()` methods may throw an exception in case of failure. 
+Make sure you catch the errors in production!
 
 ---
 
@@ -29,9 +30,13 @@ console.log(user); // prints User{ ... } in JavaScript runtime, not Object{ ... 
 
 See the changelog in the seperate file for bug fixes, new features and breaking changes: [Changelog](CHANGELOG.md)
 
-> Tip: Starting from version 1.0.6, we recommend to use unique class identifiers in the `@JsonObject` decorator. Read below how to use the decorators properly.
+> Tip: At version 1.1.0 we introduced some soft breaking changes. 
+`undefined` is an invalid value now for serializing or deserializing. 
+If you are working with TypeScript, you might receive some type issues after the update to v1.1.0.
+This is due to the addition of generics; they now help the compiler to detect invalid return types in the serialize and deserialize methods.
 
-> Tip: Version 1.0.0 has several breaking changes. When upgrading from `json2typescript` < 1.0.0, please make sure you fix these issues.
+> Tip: Starting from version 1.0.6, we recommend to use unique class identifiers in the `@JsonObject` decorator. 
+Read below how to use the decorators properly.
 
 ---
 
@@ -39,11 +44,13 @@ See the changelog in the seperate file for bug fixes, new features and breaking 
 
 ## Requirements
 
-We developed **json2typescript** for Angular 2+. In this document, we only cover this use case. However, you may use our package for pure TypeScript or even JavaScript applications.
+We developed **json2typescript** for Angular and Ionic 2+. In this document, we only cover this use case. 
+However, you may use our package for pure TypeScript or even JavaScript applications.
 
 ## Setup a Test Application
 
-We recommend to use the official **angular-cli** tool in order to set up a new Angular project. Then, all you need to do is type the following into your operating system's terminal:
+We recommend to use the official **angular cli** tool in order to set up a new Angular project. 
+Then, all you need to do is type the following into your operating system's terminal:
 
 ```sh
 ng new testApplication
@@ -52,7 +59,8 @@ cd testApplication
 npm install json2typescript
 ```
 
-Our package makes use of TypeScript decorators. Please activate them in your **tsconfig.json** under `compilerOptions` as follows:
+Our package makes use of TypeScript decorators. 
+If not done already, please activate them in your **tsconfig.json** under `compilerOptions` as follows:
 
 ```json
 {
@@ -64,11 +72,15 @@ Our package makes use of TypeScript decorators. Please activate them in your **t
 }
 ```
 
+> Tip: We have tried to make the compiler options of `json2typescript` to be as strict as possible. 
+This enables you to use compiler options such as `"strictNullChecks": true` or `"noImplicitAny": true` in your own project.
+
 Now you are ready to use the package.
 
 ## Mapping example
 
-In order to use the **json2typescript** package, all you need to do is write decorators and import the package. The following things need to be done if you would like to map JSON to existing classes:
+In order to use the **json2typescript** package, all you need to do is write decorators and import the package. 
+The following things need to be done if you would like to map JSON to existing classes:
 
 * Classes need to be preceeded by `@JsonObject(classIdentifier)`
 * Properties need to be preceeded by `@JsonProperty(jsonProperty, conversionOption, isOptional)`
@@ -209,7 +221,8 @@ Play around with the JSON to provocate exceptions when deserializing the object.
 
 ## Important notes
 
-Avoid circular depencencies on the classes that use `json2typescript`. Even if you don't have any errors in your IDE, `json2typescript` will not properly work in this case.
+Avoid circular depencencies on the classes that use `json2typescript`. 
+Even if you don't have any errors in your IDE, `json2typescript` will not properly work in this case.
 
 ---
 
@@ -234,8 +247,6 @@ overwrite the property descriptors. It is advised to explicitly ID your
 objects as above.
 
 > Tip: Make sure you import `JsonObject` from `json2typescript`.  
-
-> Tip: It is possible to deserialize multiple JSON-values into the same property. This can be useful if you have multiple JSON sources with inconsistent names, but want a single target object. In the process of serialization, the first value will be used.
 
 ```typescript
     @JsonProperty("jsonPropName", String, true)
@@ -448,6 +459,17 @@ Determines whether primitive types should be checked.
 If true, it will be allowed to assign primitive to other primitive types.
 
 The default is `false`.
+
+#### Property matching rule
+
+`(number) JsonConvert.propertyMatchingRule`
+
+Determines the rule of how JSON properties shall be matched with class properties during deserialization.
+You may assign the following two values:
+* `PropertyMatchingRule.CASE_STRICT`: JSON properties need to match exactly the names in the decorators
+* `PropertyMatchingRule.CASE_INSENSITIVE`: JSON properties need to match names in the decorators, but names they are not case sensitive
+
+The default is `PropertyMatchingRule.CASE_STRICT`.
 
 ### Public methods
 
